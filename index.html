@@ -744,7 +744,7 @@ const App = {
       stuLoading.value = true;
       try {
         const sSnap = await fs.getDoc(fs.doc(studentsCol(studentClassId.value), num));
-        if (!sSnap.exists()) { toast("명단에서 학번을 찾을 수 없습니다.", "error"); return; }
+        if (!sSnap.exists()) { toast("명단에서 번호를 찾을 수 없습니다.", "error"); return; }
         stuMatched.value = { number: num, name: sSnap.data().name || "" };
         const pSnap = await fs.getDoc(fs.doc(prefsCol(studentClassId.value), num));
         if (pSnap.exists()) {
@@ -847,7 +847,7 @@ const App = {
 
           <template v-else>
             <div v-if="stuStep === 'number'" class="card">
-              <h3>학번을 입력하세요</h3>
+              <h3>번호를 입력하세요</h3>
               <div class="row" style="margin-top:10px">
                 <input class="input" v-model="stuNumberInput" placeholder="예: 15" @keyup.enter="stuLookup" inputmode="numeric" />
               </div>
@@ -856,7 +856,7 @@ const App = {
 
             <div v-else-if="stuStep === 'confirm'" class="card center-screen" style="min-height:auto;padding:28px 20px">
               <h2>{{ stuMatched?.name || '(이름 없음)' }} 학생이 맞나요?</h2>
-              <p class="muted">학번 {{ stuMatched?.number }}</p>
+              <p class="muted">번호 {{ stuMatched?.number }}</p>
               <div class="row" style="width:100%;margin-top:10px">
                 <button class="btn" style="flex:1" @click="stuStep='number'">아니요</button>
                 <button class="btn btn-primary" style="flex:1" @click="stuProceedToChoose">네, 맞아요</button>
