@@ -186,13 +186,16 @@
 <div id="app"></div>
 
 <script defer src="https://unpkg.com/vue@3.4.31/dist/vue.global.prod.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 
 <script type="module">
 // =====================================================================================
 // 1P1J (1 Person 1 Job) - 1인 1역 배정 앱
 // 단일 index.html, 빌드 도구 없음, CDN only. Firebase Auth + Firestore.
 // =====================================================================================
+
+// qrcode 패키지는 브라우저용 번들을 따로 배포하지 않아 <script> 태그로 못 불러온다.
+// jsDelivr의 +esm 변환 엔드포인트로 ESM 모듈 그대로 가져온다.
+import { toCanvas as qrToCanvas } from "https://cdn.jsdelivr.net/npm/qrcode@1.5.3/+esm";
 
 // ------------------------------ CONFIG ------------------------------
 // 배포 전 아래 firebase 값을 실제 프로젝트(기존 "조회 도우미" 프로젝트) 설정으로 교체할 것.
@@ -584,11 +587,14 @@ const App = {
       return `${base}?s=${route.classId}`;
     });
     const qrCanvas = ref(null);
-    watch([joinUrl, () => activeTab.value], async ([url, tab]) => {
-      if (tab !== "collect" || !url || !window.QRCode) return;
-      await nextTick();
-      if (qrCanvas.value) window.QRCode.toCanvas(qrCanvas.value, url, { width: 200, margin: 1 }, () => {});
-    });
+    watch(
+      [joinUrl, () => activeTab.value, () => currentClass.value?.submissionOpen],
+      async ([url, tab, open]) => {
+        if (tab !== "collect" || !open || !url) return;
+        await nextTick();
+        if (qrCanvas.value) qrToCanvas(qrCanvas.value, url, { width: 200, margin: 1 }, () => {});
+      }
+    );
 
     const submittedNumbers = computed(() => new Set(Object.keys(preferences.value)));
     const submittedList = computed(() => students.value.filter((s) => submittedNumbers.value.has(s.number)));
