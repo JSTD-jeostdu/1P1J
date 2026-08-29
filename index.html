@@ -4,138 +4,180 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
 <title>1P1J - 1인 1역 배정</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Noto+Sans+KR:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
 <style>
   :root {
-    --primary: #2563eb;
-    --primary-dark: #1d4ed8;
-    --bg: #f8fafc;
-    --card: #ffffff;
-    --border: #e2e8f0;
-    --text: #1e293b;
-    --muted: #64748b;
-    --danger: #dc2626;
-    --success: #16a34a;
-    --warning: #d97706;
-    --warning-bg: #fffbeb;
+    /* 따뜻한 톤의 메인 팔레트 - 교실에 어울리는 차분하면서도 친근한 느낌 */
+    --primary: #6C5CE7;
+    --primary-dark: #5644D6;
+    --primary-light: #EFEBFF;
+    --bg: #FBF8F2;
+    --card: #FFFFFF;
+    --border: #EAE3D6;
+    --text: #2E2A24;
+    --muted: #8D8676;
+    --danger: #E4645A;
+    --danger-bg: #FDECEA;
+    --success: #3FA875;
+    --success-bg: #E9F7EF;
+    --warning: #D98A2B;
+    --warning-bg: #FDF3E3;
+    --gold: #E0A63B;
+    --silver: #9AA0AE;
+    --bronze: #C08552;
+    --shadow-sm: 0 1px 2px rgba(46,38,20,.05), 0 1px 1px rgba(46,38,20,.04);
+    --shadow-md: 0 4px 10px rgba(46,38,20,.06), 0 12px 28px rgba(46,38,20,.06);
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+    font-family: "Noto Sans KR", -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
     background: var(--bg);
+    background-image: radial-gradient(circle at 8% 0%, rgba(108,92,231,.06), transparent 45%), radial-gradient(circle at 100% 15%, rgba(224,166,59,.06), transparent 40%);
+    background-attachment: fixed;
     color: var(--text);
-    line-height: 1.5;
+    line-height: 1.6;
+    letter-spacing: -0.01em;
   }
   #app { min-height: 100vh; display: flex; flex-direction: column; }
   a { color: var(--primary); }
+  .brand-font { font-family: "Gowun Dodum", "Noto Sans KR", sans-serif; }
   header.topbar {
-    background: var(--card);
+    background: rgba(255,255,255,.82);
+    backdrop-filter: saturate(180%) blur(10px);
     border-bottom: 1px solid var(--border);
-    padding: 12px 20px;
+    padding: 14px 24px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
     flex-wrap: wrap;
+    position: sticky; top: 0; z-index: 50;
   }
-  header.topbar .brand { font-weight: 800; font-size: 18px; color: var(--primary-dark); cursor: pointer; }
+  header.topbar .brand { display: flex; align-items: center; gap: 9px; cursor: pointer; }
+  header.topbar .brand-mark {
+    width: 30px; height: 30px; border-radius: 9px; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--primary), #9B8CFF);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 3px 8px rgba(108,92,231,.35);
+  }
+  header.topbar .brand-mark svg { width: 16px; height: 16px; }
+  header.topbar .brand-text { font-weight: 700; font-size: 19px; color: var(--primary-dark); font-family: "Gowun Dodum", "Noto Sans KR", sans-serif; }
   header.topbar .user-box { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--muted); }
-  main.content { flex: 1; padding: 20px; max-width: 1080px; width: 100%; margin: 0 auto; }
-  .student-shell main.content { max-width: 480px; }
+  main.content { flex: 1; padding: 28px 20px; max-width: 1080px; width: 100%; margin: 0 auto; }
+  .student-shell main.content { max-width: 480px; padding: 24px 18px; }
   .card {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 16px;
+    border-radius: 18px;
+    padding: 22px;
+    margin-bottom: 18px;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow .18s ease;
   }
-  h1 { font-size: 22px; margin: 0 0 12px; }
-  h2 { font-size: 18px; margin: 0 0 12px; }
-  h3 { font-size: 15px; margin: 0 0 8px; color: var(--muted); }
-  p.hint { color: var(--muted); font-size: 13px; margin: 4px 0 0; }
+  h1 { font-size: 25px; margin: 0 0 12px; font-weight: 700; letter-spacing: -0.02em; }
+  h2 { font-size: 19px; margin: 0 0 12px; font-weight: 700; letter-spacing: -0.01em; }
+  h3 { font-size: 15px; margin: 0 0 10px; color: var(--muted); font-weight: 600; }
+  p.hint { color: var(--muted); font-size: 13px; margin: 6px 0 0; line-height: 1.55; }
   .btn {
     display: inline-flex; align-items: center; justify-content: center; gap: 6px;
     border: 1px solid var(--border); background: #fff; color: var(--text);
-    padding: 9px 16px; border-radius: 8px; font-size: 14px; cursor: pointer;
-    min-height: 40px;
+    padding: 9px 17px; border-radius: 11px; font-size: 14px; font-weight: 500; cursor: pointer;
+    min-height: 42px; transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+    font-family: inherit;
   }
-  .btn:hover { background: #f1f5f9; }
-  .btn:disabled { opacity: .5; cursor: not-allowed; }
-  .btn-primary { background: var(--primary); border-color: var(--primary); color: #fff; }
-  .btn-primary:hover { background: var(--primary-dark); }
-  .btn-danger { color: var(--danger); border-color: #fecaca; }
-  .btn-danger:hover { background: #fef2f2; }
-  .btn-sm { padding: 5px 10px; min-height: 30px; font-size: 13px; }
-  .btn-lg { padding: 14px 20px; min-height: 52px; font-size: 16px; width: 100%; }
+  .btn:hover { background: #FAF8F4; transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+  .btn:active { transform: translateY(0); }
+  .btn:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--primary), #7C6EF0); border-color: transparent; color: #fff;
+    box-shadow: 0 4px 12px rgba(108,92,231,.32);
+  }
+  .btn-primary:hover { background: linear-gradient(135deg, var(--primary-dark), var(--primary)); box-shadow: 0 6px 16px rgba(108,92,231,.4); }
+  .btn-danger { color: var(--danger); border-color: #F6D3CF; }
+  .btn-danger:hover { background: var(--danger-bg); }
+  .btn-sm { padding: 6px 12px; min-height: 32px; font-size: 13px; border-radius: 9px; }
+  .btn-lg { padding: 15px 22px; min-height: 54px; font-size: 16px; width: 100%; border-radius: 14px; font-weight: 700; }
   .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
   .row-between { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
   .input, select.input, textarea.input {
-    border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; font-size: 14px;
-    font-family: inherit; width: 100%; background: #fff; color: var(--text);
+    border: 1.5px solid var(--border); border-radius: 11px; padding: 10px 13px; font-size: 14px;
+    font-family: inherit; width: 100%; background: #fff; color: var(--text); transition: border-color .12s ease, box-shadow .12s ease;
   }
+  .input:focus, select.input:focus, textarea.input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
   textarea.input { resize: vertical; min-height: 90px; }
   table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
-  table.tbl th, table.tbl td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); }
-  table.tbl th { color: var(--muted); font-weight: 600; font-size: 13px; }
+  table.tbl th, table.tbl td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); }
+  table.tbl th { color: var(--muted); font-weight: 600; font-size: 12.5px; text-transform: uppercase; letter-spacing: .03em; }
+  table.tbl tr:last-child td { border-bottom: none; }
   .tbl-wrap { overflow-x: auto; }
   .badge {
-    display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 600;
+    display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700;
   }
-  .badge-green { background: #dcfce7; color: #166534; }
-  .badge-gray { background: #f1f5f9; color: var(--muted); }
-  .badge-blue { background: #dbeafe; color: #1e40af; }
-  .badge-red { background: #fee2e2; color: #991b1b; }
+  .badge-green { background: var(--success-bg); color: #1F7A4D; }
+  .badge-gray { background: #F1EDE3; color: var(--muted); }
+  .badge-blue { background: var(--primary-light); color: var(--primary-dark); }
+  .badge-red { background: var(--danger-bg); color: #B94339; }
   .warning-box {
-    background: var(--warning-bg); border: 1px solid #fde68a; color: #92400e;
-    padding: 12px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 12px;
+    background: var(--warning-bg); border: 1px solid #F3D9A4; color: #92600E;
+    padding: 14px 16px; border-radius: 13px; font-size: 13.5px; margin-bottom: 14px;
     display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;
   }
-  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 16px; flex-wrap: wrap; }
+  .tabs { display: flex; gap: 4px; border-bottom: 1.5px solid var(--border); margin-bottom: 20px; flex-wrap: wrap; }
   .tab {
-    padding: 10px 14px; cursor: pointer; font-size: 14px; color: var(--muted);
-    border-bottom: 2px solid transparent; margin-bottom: -1px;
+    padding: 11px 16px; cursor: pointer; font-size: 14.5px; font-weight: 500; color: var(--muted);
+    border-bottom: 2.5px solid transparent; margin-bottom: -1.5px; transition: color .12s ease, border-color .12s ease;
   }
-  .tab.active { color: var(--primary-dark); border-bottom-color: var(--primary); font-weight: 600; }
-  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; }
-  .stat-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center; }
-  .stat-box .num { font-size: 24px; font-weight: 800; color: var(--primary-dark); }
-  .stat-box .label { font-size: 12px; color: var(--muted); }
-  .choice-list { display: flex; flex-direction: column; gap: 8px; }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 700; }
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 12px; }
+  .stat-box { background: #FAF8F3; border: 1px solid var(--border); border-radius: 13px; padding: 14px; text-align: center; }
+  .stat-box .num { font-size: 26px; font-weight: 900; color: var(--primary-dark); font-family: "Gowun Dodum", "Noto Sans KR", sans-serif; }
+  .stat-box .label { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+  .choice-list { display: flex; flex-direction: column; gap: 9px; }
   .choice-option {
-    border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px;
-    display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-size: 15px;
+    border: 1.5px solid var(--border); border-radius: 13px; padding: 14px 16px; background: #fff;
+    display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-size: 15.5px; font-weight: 500;
+    transition: all .12s ease;
   }
-  .choice-option.selected { border-color: var(--primary); background: #eff6ff; }
+  .choice-option:hover { border-color: #D8CCFF; transform: translateY(-1px); }
+  .choice-option.selected { border-color: var(--primary); background: var(--primary-light); box-shadow: 0 3px 10px rgba(108,92,231,.15); }
   .choice-option .rank-badge {
     font-size: 12px; font-weight: 700; color: #fff; background: var(--muted);
-    padding: 2px 8px; border-radius: 999px;
+    padding: 3px 10px; border-radius: 999px;
   }
-  .choice-option.selected .rank-badge { background: var(--primary); }
-  .toast-container { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 8px; z-index: 999; width: 90%; max-width: 420px; }
+  .choice-option.rank1.selected .rank-badge { background: var(--gold); }
+  .choice-option.rank2.selected .rank-badge { background: var(--silver); }
+  .choice-option.rank3.selected .rank-badge { background: var(--bronze); }
+  .toast-container { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 8px; z-index: 999; width: 90%; max-width: 420px; }
   .toast {
-    background: #1e293b; color: #fff; padding: 12px 16px; border-radius: 8px; font-size: 14px;
-    box-shadow: 0 4px 12px rgba(0,0,0,.2);
+    background: #2E2A24; color: #fff; padding: 13px 18px; border-radius: 12px; font-size: 14px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.18);
   }
   .toast.error { background: var(--danger); }
   .toast.success { background: var(--success); }
   .center-screen { min-height: 60vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 14px; }
-  .draft-card { border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; cursor: pointer; }
-  .draft-card:hover { border-color: var(--primary); }
-  .draft-card.final { border-color: var(--success); background: #f0fdf4; }
+  .draft-card { border: 1.5px solid var(--border); border-radius: 14px; padding: 15px 18px; margin-bottom: 10px; cursor: pointer; background: #fff; transition: all .12s ease; }
+  .draft-card:hover { border-color: var(--primary); transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+  .draft-card.final { border-color: var(--success); background: var(--success-bg); }
   .modal-backdrop {
-    position: fixed; inset: 0; background: rgba(15,23,42,.45); display: flex; align-items: center; justify-content: center; z-index: 998; padding: 16px;
+    position: fixed; inset: 0; background: rgba(46,38,20,.4); backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: center; z-index: 998; padding: 16px;
   }
-  .modal-box { background: #fff; border-radius: 12px; padding: 22px; max-width: 420px; width: 100%; }
+  .modal-box { background: #fff; border-radius: 18px; padding: 24px; max-width: 420px; width: 100%; box-shadow: var(--shadow-md); }
   .present-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
-  .present-role { border: 1px solid var(--border); border-radius: 12px; padding: 16px; background: #fff; }
-  .present-role h3 { color: var(--text); font-size: 18px; margin-bottom: 10px; }
+  .present-role { border: 1.5px solid var(--border); border-radius: 16px; padding: 18px; background: #fff; border-top: 5px solid var(--primary); box-shadow: var(--shadow-sm); }
+  .present-role h3 { color: var(--text); font-size: 18px; margin-bottom: 10px; font-weight: 700; }
   .present-role .names { font-size: 20px; font-weight: 700; line-height: 1.8; }
   .muted { color: var(--muted); }
   .qr-box { display: flex; flex-direction: column; align-items: center; gap: 10px; }
-  code.link-code { background: #f1f5f9; padding: 8px 10px; border-radius: 6px; font-size: 13px; word-break: break-all; }
-  footer.appfoot { text-align: center; color: var(--muted); font-size: 12px; padding: 16px; }
+  .qr-box canvas { border-radius: 14px; border: 1px solid var(--border); padding: 10px; background: #fff; }
+  code.link-code { background: #F4F0E6; padding: 9px 12px; border-radius: 9px; font-size: 13px; word-break: break-all; }
+  footer.appfoot { text-align: center; color: var(--muted); font-size: 12.5px; padding: 26px 16px 22px; }
+  footer.appfoot .heart { color: #E4645A; }
   @media print {
-    header.topbar, .no-print { display: none !important; }
+    header.topbar, .no-print, footer.appfoot { display: none !important; }
     body { background: #fff; }
   }
 </style>
@@ -644,6 +686,8 @@ const App = {
     }
 
     // ---------------- 발표용 화면 ----------------
+    const presentPalette = ["#6C5CE7", "#E0A63B", "#3FA875", "#E4645A", "#4AA3D9", "#C08552"];
+    function presentColor(i) { return presentPalette[i % presentPalette.length]; }
     const presentGroups = computed(() => {
       const draft = finalDraft.value;
       if (!draft) return [];
@@ -756,7 +800,7 @@ const App = {
       toggleSubmission, joinUrl, qrCanvas, submittedList, notSubmittedList, firstChoiceCounts, roleName,
       running, runAssignment,
       currentDraft, unassignedRoster, roleAssignedCounts, reassignStudent, finalizeDraft, unlockDraft, deleteDraft,
-      finalDraft, exportCsv, presentGroups, presentUnassigned,
+      finalDraft, exportCsv, presentGroups, presentUnassigned, presentColor,
       confirmModal, askConfirm, resolveConfirm,
       stuLoading, stuError, stuClass, stuRoles, stuStep, stuNumberInput, stuMatched,
       stuChoice1, stuChoice2, stuChoice3, stuSubmitting,
@@ -780,7 +824,7 @@ const App = {
 
     <!-- ==================== 학생 모드 ==================== -->
     <template v-else-if="studentMode">
-      <header class="topbar"><div class="brand">1P1J</div></header>
+      <header class="topbar"><div class="brand"><div class="brand-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3l2.4 5.5L20 9l-4.2 3.8L17 19l-5-3.2L7 19l1.2-6.2L4 9l5.6-.5L12 3z" fill="white"/></svg></div><span class="brand-text">1P1J</span></div></header>
       <main class="content">
         <div v-if="stuLoading" class="center-screen"><p>불러오는 중...</p></div>
         <div v-else-if="stuError" class="center-screen"><h2>{{ stuError }}</h2></div>
@@ -816,21 +860,21 @@ const App = {
             <div v-else-if="stuStep === 'choose'" class="card">
               <h3>1지망 (필수)</h3>
               <div class="choice-list" style="margin-bottom:16px">
-                <div v-for="r in stuRoles" :key="r.id" class="choice-option" :class="{selected: stuChoice1===r.id}" @click="stuSelect(0, r.id)">
+                <div v-for="r in stuRoles" :key="r.id" class="choice-option rank1" :class="{selected: stuChoice1===r.id}" @click="stuSelect(0, r.id)">
                   <span>{{ r.name }}</span>
                   <span v-if="stuChoice1===r.id" class="rank-badge">1지망</span>
                 </div>
               </div>
               <h3>2지망 (선택)</h3>
               <div class="choice-list" style="margin-bottom:16px">
-                <div v-for="r in stuRoles.filter(x=>x.id!==stuChoice1)" :key="r.id" class="choice-option" :class="{selected: stuChoice2===r.id}" @click="stuSelect(1, r.id)">
+                <div v-for="r in stuRoles.filter(x=>x.id!==stuChoice1)" :key="r.id" class="choice-option rank2" :class="{selected: stuChoice2===r.id}" @click="stuSelect(1, r.id)">
                   <span>{{ r.name }}</span>
                   <span v-if="stuChoice2===r.id" class="rank-badge">2지망</span>
                 </div>
               </div>
               <h3>3지망 (선택)</h3>
               <div class="choice-list" style="margin-bottom:16px">
-                <div v-for="r in stuRoles.filter(x=>x.id!==stuChoice1 && x.id!==stuChoice2)" :key="r.id" class="choice-option" :class="{selected: stuChoice3===r.id}" @click="stuSelect(2, r.id)">
+                <div v-for="r in stuRoles.filter(x=>x.id!==stuChoice1 && x.id!==stuChoice2)" :key="r.id" class="choice-option rank3" :class="{selected: stuChoice3===r.id}" @click="stuSelect(2, r.id)">
                   <span>{{ r.name }}</span>
                   <span v-if="stuChoice3===r.id" class="rank-badge">3지망</span>
                 </div>
@@ -851,7 +895,7 @@ const App = {
     <!-- ==================== 교사 모드 ==================== -->
     <template v-else>
       <header class="topbar">
-        <div class="brand" @click="go('#/classes')">1P1J</div>
+        <div class="brand" @click="go('#/classes')"><div class="brand-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3l2.4 5.5L20 9l-4.2 3.8L17 19l-5-3.2L7 19l1.2-6.2L4 9l5.6-.5L12 3z" fill="white"/></svg></div><span class="brand-text">1P1J</span></div>
         <div v-if="user" class="user-box">
           <span>{{ user.displayName || user.email }}</span>
           <button class="btn btn-sm" @click="signOutUser">로그아웃</button>
@@ -1105,7 +1149,7 @@ const App = {
           <div v-if="!finalDraft" class="center-screen"><p>확정된 배정안이 없습니다.</p></div>
           <template v-else>
             <div class="present-grid">
-              <div v-for="g in presentGroups" :key="g.role.id" class="present-role">
+              <div v-for="(g,gi) in presentGroups" :key="g.role.id" class="present-role" :style="{borderTopColor: presentColor(gi)}">
                 <h3>{{ g.role.name }}</h3>
                 <div class="names">{{ g.names.join(', ') || '-' }}</div>
               </div>
@@ -1131,6 +1175,8 @@ const App = {
         </div>
       </div>
     </div>
+
+    <footer class="appfoot no-print">Made by 정우쌤 <span class="heart">·</span> Inspired by HSBT</footer>
 
     <div class="toast-container no-print">
       <div v-for="t in toasts" :key="t.id" class="toast" :class="t.type">{{ t.message }}</div>
