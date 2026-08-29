@@ -1,0 +1,1145 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>1P1J - 1인 1역 배정</title>
+<style>
+  :root {
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --border: #e2e8f0;
+    --text: #1e293b;
+    --muted: #64748b;
+    --danger: #dc2626;
+    --success: #16a34a;
+    --warning: #d97706;
+    --warning-bg: #fffbeb;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+  }
+  #app { min-height: 100vh; display: flex; flex-direction: column; }
+  a { color: var(--primary); }
+  header.topbar {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  header.topbar .brand { font-weight: 800; font-size: 18px; color: var(--primary-dark); cursor: pointer; }
+  header.topbar .user-box { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--muted); }
+  main.content { flex: 1; padding: 20px; max-width: 1080px; width: 100%; margin: 0 auto; }
+  .student-shell main.content { max-width: 480px; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  h1 { font-size: 22px; margin: 0 0 12px; }
+  h2 { font-size: 18px; margin: 0 0 12px; }
+  h3 { font-size: 15px; margin: 0 0 8px; color: var(--muted); }
+  p.hint { color: var(--muted); font-size: 13px; margin: 4px 0 0; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    border: 1px solid var(--border); background: #fff; color: var(--text);
+    padding: 9px 16px; border-radius: 8px; font-size: 14px; cursor: pointer;
+    min-height: 40px;
+  }
+  .btn:hover { background: #f1f5f9; }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+  .btn-primary:hover { background: var(--primary-dark); }
+  .btn-danger { color: var(--danger); border-color: #fecaca; }
+  .btn-danger:hover { background: #fef2f2; }
+  .btn-sm { padding: 5px 10px; min-height: 30px; font-size: 13px; }
+  .btn-lg { padding: 14px 20px; min-height: 52px; font-size: 16px; width: 100%; }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .row-between { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .input, select.input, textarea.input {
+    border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; font-size: 14px;
+    font-family: inherit; width: 100%; background: #fff; color: var(--text);
+  }
+  textarea.input { resize: vertical; min-height: 90px; }
+  table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
+  table.tbl th, table.tbl td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+  table.tbl th { color: var(--muted); font-weight: 600; font-size: 13px; }
+  .tbl-wrap { overflow-x: auto; }
+  .badge {
+    display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 600;
+  }
+  .badge-green { background: #dcfce7; color: #166534; }
+  .badge-gray { background: #f1f5f9; color: var(--muted); }
+  .badge-blue { background: #dbeafe; color: #1e40af; }
+  .badge-red { background: #fee2e2; color: #991b1b; }
+  .warning-box {
+    background: var(--warning-bg); border: 1px solid #fde68a; color: #92400e;
+    padding: 12px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 12px;
+    display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 16px; flex-wrap: wrap; }
+  .tab {
+    padding: 10px 14px; cursor: pointer; font-size: 14px; color: var(--muted);
+    border-bottom: 2px solid transparent; margin-bottom: -1px;
+  }
+  .tab.active { color: var(--primary-dark); border-bottom-color: var(--primary); font-weight: 600; }
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; }
+  .stat-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center; }
+  .stat-box .num { font-size: 24px; font-weight: 800; color: var(--primary-dark); }
+  .stat-box .label { font-size: 12px; color: var(--muted); }
+  .choice-list { display: flex; flex-direction: column; gap: 8px; }
+  .choice-option {
+    border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px;
+    display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-size: 15px;
+  }
+  .choice-option.selected { border-color: var(--primary); background: #eff6ff; }
+  .choice-option .rank-badge {
+    font-size: 12px; font-weight: 700; color: #fff; background: var(--muted);
+    padding: 2px 8px; border-radius: 999px;
+  }
+  .choice-option.selected .rank-badge { background: var(--primary); }
+  .toast-container { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 8px; z-index: 999; width: 90%; max-width: 420px; }
+  .toast {
+    background: #1e293b; color: #fff; padding: 12px 16px; border-radius: 8px; font-size: 14px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.2);
+  }
+  .toast.error { background: var(--danger); }
+  .toast.success { background: var(--success); }
+  .center-screen { min-height: 60vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 14px; }
+  .draft-card { border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; cursor: pointer; }
+  .draft-card:hover { border-color: var(--primary); }
+  .draft-card.final { border-color: var(--success); background: #f0fdf4; }
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(15,23,42,.45); display: flex; align-items: center; justify-content: center; z-index: 998; padding: 16px;
+  }
+  .modal-box { background: #fff; border-radius: 12px; padding: 22px; max-width: 420px; width: 100%; }
+  .present-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+  .present-role { border: 1px solid var(--border); border-radius: 12px; padding: 16px; background: #fff; }
+  .present-role h3 { color: var(--text); font-size: 18px; margin-bottom: 10px; }
+  .present-role .names { font-size: 20px; font-weight: 700; line-height: 1.8; }
+  .muted { color: var(--muted); }
+  .qr-box { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  code.link-code { background: #f1f5f9; padding: 8px 10px; border-radius: 6px; font-size: 13px; word-break: break-all; }
+  footer.appfoot { text-align: center; color: var(--muted); font-size: 12px; padding: 16px; }
+  @media print {
+    header.topbar, .no-print { display: none !important; }
+    body { background: #fff; }
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script defer src="https://unpkg.com/vue@3.4.31/dist/vue.global.prod.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+
+<script type="module">
+// =====================================================================================
+// 1P1J (1 Person 1 Job) - 1인 1역 배정 앱
+// 단일 index.html, 빌드 도구 없음, CDN only. Firebase Auth + Firestore.
+// =====================================================================================
+
+// ------------------------------ CONFIG ------------------------------
+// 배포 전 아래 firebase 값을 실제 프로젝트(기존 "조회 도우미" 프로젝트) 설정으로 교체할 것.
+// Firebase 콘솔 > 프로젝트 설정 > 내 앱 > SDK 설정 및 구성 에서 값을 복사한다.
+const CONFIG = {
+  firebase: {
+    apiKey: "AIzaSyBkvvMbzg4sj16Rk2UMTWRd90YDvS_rGiE",
+    authDomain: "johoe-9am.firebaseapp.com",
+    projectId: "johoe-9am",
+    storageBucket: "johoe-9am.firebasestorage.app",
+    messagingSenderId: "828941685433",
+    appId: "1:828941685433:web:d8740edd3124184e80c168",
+  },
+  // 기존 Firebase 프로젝트에 얹는 방식이므로, 이 앱의 컬렉션은 모두 이 접두어를 사용해
+  // 기존 앱(조회 도우미) 데이터와 충돌하지 않도록 한다.
+  collectionPrefix: "roleAssign_",
+  // 역할 설정 화면 진입 시 기본 제공되는 프리셋 (교사가 자유롭게 수정/삭제 가능)
+  rolePresets: [
+    { name: "학습부", capacity: 2 },
+    { name: "급식부", capacity: 3 },
+    { name: "칠판부", capacity: 2 },
+    { name: "청소부", capacity: 4 },
+    { name: "도서부", capacity: 2 },
+    { name: "체육부", capacity: 2 },
+    { name: "분리수거부", capacity: 2 },
+    { name: "환경미화부", capacity: 2 },
+    { name: "우유급식부", capacity: 2 },
+    { name: "방송부", capacity: 2 },
+    { name: "정보부", capacity: 1 },
+    { name: "실내화정리부", capacity: 2 },
+  ],
+};
+
+const isFirebaseConfigured = !Object.values(CONFIG.firebase).some((v) => String(v).startsWith("REPLACE_WITH"));
+
+// ------------------------------ 배정 알고리즘 (min-cost max-flow) ------------------------------
+// students: [{ id(=학번), choices: [roleId, ...] (1~3개, 우선순위 순) }]  — 지망을 제출한 학생만 넘긴다.
+// roles: [{ id, capacity }]
+// 반환: { assignments: {학번: roleId|null}, stats: {first, second, third, unassigned} }
+function computeAssignment(students, roles) {
+  if (students.length === 0) {
+    return { assignments: {}, stats: { first: 0, second: 0, third: 0, unassigned: 0 } };
+  }
+
+  const shuffledStudents = shuffleArray(students);
+  const S = shuffledStudents.length;
+  const R = roles.length;
+  const source = 0;
+  const sink = S + R + 1;
+  const N = S + R + 2;
+
+  // 사전식(lexicographic) 우선순위 보장 비용 설계.
+  // "1지망 인원 최대화가 최우선, 그다음 2지망, 그다음 3지망"을 순수 총비용 최소화만으로 달성하려면
+  // 인접 등급 간 비용 격차가 "하위 등급 학생 전원을 최대로 개선했을 때의 이득 총합"보다 커야 한다.
+  // (선형 가중치 0/10/100처럼 격차가 작으면, 상위 지망 1명을 희생해 하위 지망 여러 명을 구제하는
+  //  왜곡이 생길 수 있다 — 실제로 이 구현에서 테스트로 확인 후 지수적 가중치로 수정함.)
+  // base가 학생 수(S)보다 충분히 크면, 어떤 하위 등급 재배치도 상위 등급 1단계 변화를 절대 앞서지 못한다.
+  const base = S * 2 + 10;
+  const costByRank = [-(base * base), -base, -1]; // 1/2/3지망 (음수= 비용 최소화 시 우대됨)
+  const unassignedCost = 0; // 미배정이 가장 나쁨
+
+  const roleIndex = new Map(roles.map((r, i) => [r.id, S + 1 + i]));
+  const graph = Array.from({ length: N }, () => []);
+  const addEdge = (u, v, cap, cost) => {
+    graph[u].push({ to: v, cap, cost, flow: 0, rev: graph[v].length });
+    graph[v].push({ to: u, cap: 0, cost: -cost, flow: 0, rev: graph[u].length - 1 });
+  };
+
+  shuffledStudents.forEach((s, i) => {
+    const node = 1 + i;
+    addEdge(source, node, 1, 0);
+    s.choices.slice(0, 3).forEach((roleId, rank) => {
+      const rNode = roleIndex.get(roleId);
+      if (rNode === undefined) return; // 삭제된 역할을 지망했던 경우 방어적으로 무시
+      addEdge(node, rNode, 1, costByRank[rank] ?? -1);
+    });
+    // 미배정도 유량의 일부로 명시적으로 모델링(항상 sink까지 경로 확보) → 최대유량이 학생 수로 고정되고,
+    // 그 안에서의 순수 비용 최소화만으로 등급별 인원 사전식 최대화가 성립한다.
+    addEdge(node, sink, 1, unassignedCost);
+  });
+  roles.forEach((r) => addEdge(roleIndex.get(r.id), sink, r.capacity, 0));
+
+  // SPFA 기반 최소비용 최대유량 (successive shortest augmenting path)
+  while (true) {
+    const dist = new Array(N).fill(Infinity);
+    const inQueue = new Array(N).fill(false);
+    const prevEdge = new Array(N).fill(null);
+    dist[source] = 0;
+    const queue = [source];
+    inQueue[source] = true;
+    while (queue.length) {
+      const u = queue.shift();
+      inQueue[u] = false;
+      for (let ei = 0; ei < graph[u].length; ei++) {
+        const e = graph[u][ei];
+        if (e.cap - e.flow <= 0) continue;
+        const nd = dist[u] + e.cost;
+        if (nd < dist[e.to]) {
+          dist[e.to] = nd;
+          prevEdge[e.to] = { u, ei };
+          if (!inQueue[e.to]) { queue.push(e.to); inQueue[e.to] = true; }
+        }
+      }
+    }
+    if (dist[sink] === Infinity) break;
+    let aug = Infinity, v = sink;
+    while (v !== source) { const { u, ei } = prevEdge[v]; aug = Math.min(aug, graph[u][ei].cap - graph[u][ei].flow); v = u; }
+    v = sink;
+    while (v !== source) {
+      const { u, ei } = prevEdge[v];
+      graph[u][ei].flow += aug;
+      graph[v][graph[u][ei].rev].flow -= aug;
+      v = u;
+    }
+  }
+
+  const assignments = {};
+  students.forEach((s) => { assignments[s.id] = null; });
+  shuffledStudents.forEach((s, i) => {
+    const node = 1 + i;
+    for (const e of graph[node]) {
+      if (e.flow > 0 && e.to >= S + 1 && e.to <= S + R) {
+        const role = roles.find((r) => roleIndex.get(r.id) === e.to);
+        assignments[s.id] = role.id;
+      }
+    }
+  });
+
+  const stats = { first: 0, second: 0, third: 0, unassigned: 0 };
+  students.forEach((s) => {
+    const assigned = assignments[s.id];
+    if (assigned === null) { stats.unassigned++; return; }
+    const rank = s.choices.indexOf(assigned);
+    if (rank === 0) stats.first++; else if (rank === 1) stats.second++; else if (rank === 2) stats.third++;
+  });
+
+  return { assignments, stats };
+}
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ------------------------------ 명단 붙여넣기 파싱 ------------------------------
+function parseRosterPaste(text) {
+  const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  const rows = [];
+  for (const line of lines) {
+    const cols = line.split(/\t|,|\s{2,}/).map((c) => c.trim()).filter((c) => c !== "");
+    if (cols.length < 1) continue;
+    // 헤더로 보이는 행("학번", "번호", "이름" 등)은 건너뛴다
+    if (/^(학번|번호|no\.?|number)$/i.test(cols[0])) continue;
+    const number = cols[0];
+    const name = cols[1] || "";
+    if (!number) continue;
+    rows.push({ number, name });
+  }
+  return rows;
+}
+
+function generateRangeRows(start, end) {
+  const s = parseInt(start, 10), e = parseInt(end, 10);
+  if (isNaN(s) || isNaN(e) || s > e) return [];
+  const rows = [];
+  for (let n = s; n <= e; n++) rows.push({ number: String(n), name: "" });
+  return rows;
+}
+
+// ------------------------------ Firebase ------------------------------
+let firebaseApp = null, auth = null, db = null, fs = null, authMod = null;
+async function initFirebase() {
+  if (!isFirebaseConfigured) return;
+  const [{ initializeApp }, authModule, fsModule] = await Promise.all([
+    import("https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js"),
+    import("https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js"),
+    import("https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js"),
+  ]);
+  firebaseApp = initializeApp(CONFIG.firebase);
+  authMod = authModule;
+  fs = fsModule;
+  auth = authModule.getAuth(firebaseApp);
+  db = fsModule.getFirestore(firebaseApp);
+}
+
+const P = () => CONFIG.collectionPrefix;
+const classesCol = () => fs.collection(db, `${P()}classes`);
+const classDocRef = (classId) => fs.doc(db, `${P()}classes/${classId}`);
+const studentsCol = (classId) => fs.collection(db, `${P()}classes/${classId}/students`);
+const rolesCol = (classId) => fs.collection(db, `${P()}classes/${classId}/roles`);
+const prefsCol = (classId) => fs.collection(db, `${P()}classes/${classId}/preferences`);
+const draftsCol = (classId) => fs.collection(db, `${P()}classes/${classId}/drafts`);
+
+// ------------------------------ CSV / 인쇄 ------------------------------
+function downloadCsv(filename, rows) {
+  const csv = rows.map((r) => r.map((c) => `"${String(c ?? "").replace(/"/g, '""')}"`).join(",")).join("\r\n");
+  const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ------------------------------ Vue App ------------------------------
+const { createApp, ref, reactive, computed, watch, onMounted, onBeforeUnmount, nextTick } = Vue;
+
+const App = {
+  setup() {
+    const loadingApp = ref(true);
+    const firebaseConfigured = ref(isFirebaseConfigured);
+
+    // 학생 모드 여부: ?s=classId 쿼리 파라미터로 판별
+    const urlParams = new URLSearchParams(location.search);
+    const studentMode = ref(urlParams.has("s"));
+    const studentClassId = ref(urlParams.get("s") || "");
+
+    const toasts = reactive([]);
+    let toastSeq = 0;
+    function toast(message, type = "info") {
+      const id = ++toastSeq;
+      toasts.push({ id, message, type });
+      setTimeout(() => { const idx = toasts.findIndex((t) => t.id === id); if (idx >= 0) toasts.splice(idx, 1); }, 3200);
+    }
+
+    // ---------------- 라우팅 (해시 기반, 교사 화면 전용) ----------------
+    const route = reactive({ view: "classes", classId: null, draftId: null });
+    function parseHash() {
+      const h = location.hash.replace(/^#\/?/, "");
+      const parts = h.split("/").filter(Boolean);
+      if (parts[0] === "class" && parts[1]) {
+        route.classId = decodeURIComponent(parts[1]);
+        if (parts[2] === "draft" && parts[3]) { route.view = "draft"; route.draftId = decodeURIComponent(parts[3]); }
+        else if (parts[2] === "present") { route.view = "present"; route.draftId = null; }
+        else { route.view = "class"; route.draftId = null; }
+      } else {
+        route.view = "classes"; route.classId = null; route.draftId = null;
+      }
+    }
+    function go(hash) { location.hash = hash; }
+    window.addEventListener("hashchange", parseHash);
+
+    // ---------------- 인증 ----------------
+    const user = ref(null);
+    async function signIn() {
+      try {
+        const provider = new authMod.GoogleAuthProvider();
+        await authMod.signInWithPopup(auth, provider);
+      } catch (e) { toast("로그인에 실패했습니다: " + e.message, "error"); }
+    }
+    async function signOutUser() { await authMod.signOut(auth); go("#/classes"); }
+
+    // ---------------- 교사: 학급 목록 ----------------
+    const classes = ref([]);
+    let unsubClasses = null;
+    function subscribeClasses() {
+      if (unsubClasses) unsubClasses();
+      const q = fs.query(classesCol(), fs.where("ownerUid", "==", user.value.uid));
+      unsubClasses = fs.onSnapshot(q, (snap) => {
+        classes.value = snap.docs.map((d) => ({ id: d.id, ...d.data() })).sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+      });
+    }
+    const newClassName = ref("");
+    async function createClass() {
+      const name = newClassName.value.trim();
+      if (!name) return;
+      const docRef = await fs.addDoc(classesCol(), {
+        ownerUid: user.value.uid, className: name, submissionOpen: false,
+        createdAt: fs.serverTimestamp(), updatedAt: fs.serverTimestamp(),
+      });
+      newClassName.value = "";
+      go(`#/class/${docRef.id}`);
+    }
+    async function deleteClass(classId) {
+      await fs.deleteDoc(classDocRef(classId));
+      toast("학급을 삭제했습니다.");
+    }
+
+    // ---------------- 교사: 학급 작업공간 ----------------
+    const currentClass = ref(null);
+    const students = ref([]);
+    const roles = ref([]);
+    const preferences = ref({}); // { 학번: {choices, submittedAt} }
+    const drafts = ref([]);
+    const activeTab = ref("roster");
+    let unsubClass = null, unsubStudents = null, unsubRoles = null, unsubPrefs = null, unsubDrafts = null;
+
+    function clearClassSubs() {
+      [unsubClass, unsubStudents, unsubRoles, unsubPrefs, unsubDrafts].forEach((u) => u && u());
+      unsubClass = unsubStudents = unsubRoles = unsubPrefs = unsubDrafts = null;
+    }
+
+    function subscribeClass(classId) {
+      clearClassSubs();
+      currentClass.value = null; students.value = []; roles.value = []; preferences.value = {}; drafts.value = [];
+      unsubClass = fs.onSnapshot(classDocRef(classId), (d) => { currentClass.value = d.exists() ? { id: d.id, ...d.data() } : null; });
+      unsubStudents = fs.onSnapshot(studentsCol(classId), (snap) => {
+        students.value = snap.docs.map((d) => ({ number: d.id, ...d.data() })).sort((a, b) => naturalCompare(a.number, b.number));
+      });
+      unsubRoles = fs.onSnapshot(rolesCol(classId), (snap) => {
+        roles.value = snap.docs.map((d) => ({ id: d.id, ...d.data() })).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+      });
+      unsubPrefs = fs.onSnapshot(prefsCol(classId), (snap) => {
+        const map = {};
+        snap.docs.forEach((d) => { map[d.id] = d.data(); });
+        preferences.value = map;
+      });
+      unsubDrafts = fs.onSnapshot(draftsCol(classId), (snap) => {
+        drafts.value = snap.docs.map((d) => ({ id: d.id, ...d.data() })).sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+      });
+    }
+
+    function naturalCompare(a, b) {
+      const na = parseFloat(a), nb = parseFloat(b);
+      if (!isNaN(na) && !isNaN(nb) && String(na) === a && String(nb) === b) return na - nb;
+      return String(a).localeCompare(String(b), "ko");
+    }
+
+    watch(() => route.classId, (id) => {
+      if (id && (route.view === "class" || route.view === "draft" || route.view === "present")) subscribeClass(id);
+      if (!id) clearClassSubs();
+    }, { immediate: true });
+
+    // ---------------- 명단 등록 ----------------
+    const pasteText = ref("");
+    const pastePreview = computed(() => parseRosterPaste(pasteText.value));
+    async function confirmPasteImport() {
+      const rows = pastePreview.value;
+      if (rows.length === 0) return toast("붙여넣은 내용에서 인식된 행이 없습니다.", "error");
+      const batch = fs.writeBatch(db);
+      rows.forEach((r) => { batch.set(fs.doc(studentsCol(route.classId), r.number), { name: r.name }, { merge: true }); });
+      await batch.commit();
+      pasteText.value = "";
+      toast(`${rows.length}명을 등록했습니다.`, "success");
+    }
+    const rangeStart = ref(""), rangeEnd = ref("");
+    async function confirmRangeGenerate() {
+      const rows = generateRangeRows(rangeStart.value, rangeEnd.value);
+      if (rows.length === 0) return toast("유효한 번호 범위를 입력하세요.", "error");
+      const batch = fs.writeBatch(db);
+      rows.forEach((r) => { batch.set(fs.doc(studentsCol(route.classId), r.number), { name: r.name }, { merge: true }); });
+      await batch.commit();
+      rangeStart.value = ""; rangeEnd.value = "";
+      toast(`${rows.length}개 번호 행을 생성했습니다. 이름을 채워주세요.`, "success");
+    }
+    async function updateStudentName(number, name) {
+      await fs.setDoc(fs.doc(studentsCol(route.classId), number), { name }, { merge: true });
+    }
+    const newStudentNumber = ref(""), newStudentName = ref("");
+    async function addStudentManually() {
+      const num = newStudentNumber.value.trim();
+      if (!num) return;
+      if (num.includes("/")) return toast("학번에 '/' 문자는 사용할 수 없습니다.", "error");
+      await fs.setDoc(fs.doc(studentsCol(route.classId), num), { name: newStudentName.value.trim() }, { merge: true });
+      newStudentNumber.value = ""; newStudentName.value = "";
+    }
+    async function deleteStudent(number) { await fs.deleteDoc(fs.doc(studentsCol(route.classId), number)); }
+
+    // ---------------- 역할 설정 ----------------
+    async function loadPreset() {
+      const batch = fs.writeBatch(db);
+      CONFIG.rolePresets.forEach((r, i) => {
+        batch.set(fs.doc(rolesCol(route.classId)), { name: r.name, capacity: r.capacity, order: i });
+      });
+      await batch.commit();
+      toast("기본 프리셋을 불러왔습니다.");
+    }
+    async function addRole() {
+      await fs.addDoc(rolesCol(route.classId), { name: "새 역할", capacity: 1, order: roles.value.length });
+    }
+    async function updateRole(roleId, patch) { await fs.updateDoc(fs.doc(rolesCol(route.classId), roleId), patch); }
+    async function deleteRole(roleId) { await fs.deleteDoc(fs.doc(rolesCol(route.classId), roleId)); }
+
+    const capacityTotal = computed(() => roles.value.reduce((sum, r) => sum + (Number(r.capacity) || 0), 0));
+    const studentCount = computed(() => students.value.length);
+    const capacityShort = computed(() => Math.max(0, studentCount.value - capacityTotal.value));
+
+    // ---------------- 지망 접수 관리 ----------------
+    async function toggleSubmission() {
+      await fs.updateDoc(classDocRef(route.classId), { submissionOpen: !currentClass.value.submissionOpen, updatedAt: fs.serverTimestamp() });
+    }
+    const joinUrl = computed(() => {
+      if (!route.classId) return "";
+      const base = location.origin + location.pathname;
+      return `${base}?s=${route.classId}`;
+    });
+    const qrCanvas = ref(null);
+    watch([joinUrl, () => activeTab.value], async ([url, tab]) => {
+      if (tab !== "collect" || !url || !window.QRCode) return;
+      await nextTick();
+      if (qrCanvas.value) window.QRCode.toCanvas(qrCanvas.value, url, { width: 200, margin: 1 }, () => {});
+    });
+
+    const submittedNumbers = computed(() => new Set(Object.keys(preferences.value)));
+    const submittedList = computed(() => students.value.filter((s) => submittedNumbers.value.has(s.number)));
+    const notSubmittedList = computed(() => students.value.filter((s) => !submittedNumbers.value.has(s.number)));
+    const firstChoiceCounts = computed(() => {
+      const counts = {};
+      roles.value.forEach((r) => { counts[r.id] = 0; });
+      Object.values(preferences.value).forEach((p) => {
+        const first = p.choices && p.choices[0];
+        if (first && counts[first] !== undefined) counts[first]++;
+      });
+      return counts;
+    });
+    function roleName(roleId) { const r = roles.value.find((x) => x.id === roleId); return r ? r.name : "(삭제된 역할)"; }
+
+    // ---------------- 배정 실행 ----------------
+    const running = ref(false);
+    async function runAssignment() {
+      if (roles.value.length === 0) return toast("역할을 먼저 설정하세요.", "error");
+      running.value = true;
+      try {
+        const roleIds = new Set(roles.value.map((r) => r.id));
+        const studentInputs = Object.entries(preferences.value)
+          .filter(([num]) => students.value.some((s) => s.number === num)) // 명단에서 삭제된 학생 제외
+          .map(([num, p]) => ({ id: num, choices: (p.choices || []).filter((c) => roleIds.has(c)) }));
+        const { assignments, stats } = computeAssignment(studentInputs, roles.value.map((r) => ({ id: r.id, capacity: Number(r.capacity) || 0 })));
+        await fs.addDoc(draftsCol(route.classId), { assignments, stats, isFinal: false, createdAt: fs.serverTimestamp() });
+        toast("배정안을 생성했습니다.", "success");
+      } finally { running.value = false; }
+    }
+
+    // ---------------- 배정안 상세 ----------------
+    const currentDraft = computed(() => drafts.value.find((d) => d.id === route.draftId) || null);
+    const unassignedRoster = computed(() => {
+      if (!currentDraft.value) return [];
+      return students.value.filter((s) => !currentDraft.value.assignments[s.number]).map((s) => ({
+        ...s, submitted: submittedNumbers.value.has(s.number),
+      }));
+    });
+    const roleAssignedCounts = computed(() => {
+      const counts = {};
+      if (currentDraft.value) Object.values(currentDraft.value.assignments).forEach((roleId) => { if (roleId) counts[roleId] = (counts[roleId] || 0) + 1; });
+      return counts;
+    });
+    async function reassignStudent(number, roleId) {
+      const draft = currentDraft.value;
+      if (!draft) return;
+      const role = roles.value.find((r) => r.id === roleId);
+      if (roleId) {
+        const currentCount = Object.entries(draft.assignments).filter(([n, r]) => r === roleId && n !== number).length;
+        if (role && currentCount >= role.capacity) toast(`'${role.name}' 정원(${role.capacity}명)을 초과합니다. 그래도 반영되었습니다.`, "error");
+      }
+      const newAssignments = { ...draft.assignments, [number]: roleId || null };
+      const stats = recomputeStats(newAssignments);
+      await fs.updateDoc(fs.doc(draftsCol(route.classId), draft.id), { assignments: newAssignments, stats });
+    }
+    function recomputeStats(assignments) {
+      const stats = { first: 0, second: 0, third: 0, unassigned: 0 };
+      Object.entries(assignments).forEach(([num, roleId]) => {
+        if (!roleId) { stats.unassigned++; return; }
+        const choices = preferences.value[num]?.choices || [];
+        const rank = choices.indexOf(roleId);
+        if (rank === 0) stats.first++; else if (rank === 1) stats.second++; else if (rank === 2) stats.third++;
+        else stats.unassigned += 0; // 수동으로 지망 외 역할을 배정한 경우 (통계에서 어떤 지망에도 안 잡힘, 정상)
+      });
+      return stats;
+    }
+    async function finalizeDraft(draftId) {
+      const batch = fs.writeBatch(db);
+      drafts.value.forEach((d) => { if (d.isFinal && d.id !== draftId) batch.update(fs.doc(draftsCol(route.classId), d.id), { isFinal: false }); });
+      batch.update(fs.doc(draftsCol(route.classId), draftId), { isFinal: true });
+      await batch.commit();
+      toast("배정안을 최종 확정했습니다.", "success");
+    }
+    async function unlockDraft(draftId) {
+      await fs.updateDoc(fs.doc(draftsCol(route.classId), draftId), { isFinal: false });
+    }
+    async function deleteDraft(draftId) {
+      await fs.deleteDoc(fs.doc(draftsCol(route.classId), draftId));
+      go(`#/class/${route.classId}`);
+    }
+
+    const finalDraft = computed(() => drafts.value.find((d) => d.isFinal) || null);
+    function exportCsv() {
+      const draft = currentDraft.value || finalDraft.value;
+      if (!draft) return toast("내보낼 배정안이 없습니다.", "error");
+      const rows = [["학번", "이름", "배정된 역할", "지망 순위"]];
+      students.value.forEach((s) => {
+        const roleId = draft.assignments[s.number];
+        const choices = preferences.value[s.number]?.choices || [];
+        const rank = roleId ? choices.indexOf(roleId) : -1;
+        rows.push([s.number, s.name, roleId ? roleName(roleId) : "미배정", rank >= 0 ? `${rank + 1}지망` : ""]);
+      });
+      downloadCsv(`${currentClass.value?.className || "학급"}_배정결과.csv`, rows);
+    }
+
+    // ---------------- 발표용 화면 ----------------
+    const presentGroups = computed(() => {
+      const draft = finalDraft.value;
+      if (!draft) return [];
+      return roles.value.map((r) => ({
+        role: r,
+        names: students.value.filter((s) => draft.assignments[s.number] === r.id).map((s) => s.name || s.number),
+      }));
+    });
+    const presentUnassigned = computed(() => {
+      const draft = finalDraft.value;
+      if (!draft) return [];
+      return students.value.filter((s) => !draft.assignments[s.number]).map((s) => s.name || s.number);
+    });
+
+    // ---------------- 삭제 확인 모달 ----------------
+    const confirmModal = ref(null); // { message, onConfirm }
+    function askConfirm(message, onConfirm) { confirmModal.value = { message, onConfirm }; }
+    function resolveConfirm(ok) {
+      const m = confirmModal.value; confirmModal.value = null;
+      if (ok && m) m.onConfirm();
+    }
+
+    // ---------------- 학생 모드 ----------------
+    const stuLoading = ref(true);
+    const stuError = ref("");
+    const stuClass = ref(null);
+    const stuRoles = ref([]);
+    const stuStep = ref("number"); // number | confirm | choose | done
+    const stuNumberInput = ref("");
+    const stuMatched = ref(null);
+    const stuChoice1 = ref(""), stuChoice2 = ref(""), stuChoice3 = ref("");
+    const stuSubmitting = ref(false);
+
+    async function loadStudentClass() {
+      try {
+        const cSnap = await fs.getDoc(classDocRef(studentClassId.value));
+        if (!cSnap.exists()) { stuError.value = "존재하지 않는 학급 링크입니다."; return; }
+        stuClass.value = { id: cSnap.id, ...cSnap.data() };
+        const rSnap = await fs.getDocs(rolesCol(studentClassId.value));
+        stuRoles.value = rSnap.docs.map((d) => ({ id: d.id, ...d.data() })).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+      } catch (e) {
+        stuError.value = "학급 정보를 불러오지 못했습니다.";
+      } finally { stuLoading.value = false; }
+    }
+    async function stuLookup() {
+      const num = stuNumberInput.value.trim();
+      if (!num) return;
+      stuLoading.value = true;
+      try {
+        const sSnap = await fs.getDoc(fs.doc(studentsCol(studentClassId.value), num));
+        if (!sSnap.exists()) { toast("명단에서 학번을 찾을 수 없습니다.", "error"); return; }
+        stuMatched.value = { number: num, name: sSnap.data().name || "" };
+        const pSnap = await fs.getDoc(fs.doc(prefsCol(studentClassId.value), num));
+        if (pSnap.exists()) {
+          const c = pSnap.data().choices || [];
+          stuChoice1.value = c[0] || ""; stuChoice2.value = c[1] || ""; stuChoice3.value = c[2] || "";
+        }
+        stuStep.value = "confirm";
+      } finally { stuLoading.value = false; }
+    }
+    function stuProceedToChoose() { stuStep.value = "choose"; }
+    function stuSelect(rank, roleId) {
+      const cur = [stuChoice1, stuChoice2, stuChoice3];
+      // 다른 순위에서 이미 선택된 역할이면 그 순위는 해제 (중복 선택 불가)
+      cur.forEach((c, i) => { if (i !== rank && c.value === roleId) c.value = ""; });
+      cur[rank].value = cur[rank].value === roleId ? "" : roleId;
+    }
+    async function stuSubmit() {
+      if (!stuChoice1.value) return toast("1지망은 반드시 선택해야 합니다.", "error");
+      stuSubmitting.value = true;
+      try {
+        const choices = [stuChoice1.value, stuChoice2.value, stuChoice3.value].filter(Boolean);
+        await fs.setDoc(fs.doc(prefsCol(studentClassId.value), stuMatched.value.number), {
+          choices, submittedAt: fs.serverTimestamp(),
+        }, { merge: true });
+        stuStep.value = "done";
+      } catch (e) {
+        toast("제출에 실패했습니다. 접수가 마감되었을 수 있습니다.", "error");
+      } finally { stuSubmitting.value = false; }
+    }
+    function stuEditAgain() { stuStep.value = "choose"; }
+
+    // ---------------- 초기화 ----------------
+    onMounted(async () => {
+      if (!firebaseConfigured.value) { loadingApp.value = false; return; }
+      await initFirebase();
+      if (studentMode.value) {
+        await loadStudentClass();
+        loadingApp.value = false;
+        return;
+      }
+      parseHash();
+      authMod.onAuthStateChanged(auth, (u) => {
+        user.value = u;
+        loadingApp.value = false;
+        if (u) subscribeClasses();
+      });
+    });
+    onBeforeUnmount(() => { clearClassSubs(); if (unsubClasses) unsubClasses(); window.removeEventListener("hashchange", parseHash); });
+
+    return {
+      loadingApp, firebaseConfigured, studentMode,
+      toasts, route, go,
+      user, signIn, signOutUser,
+      classes, newClassName, createClass, deleteClass,
+      currentClass, students, roles, preferences, drafts, activeTab,
+      pasteText, pastePreview, confirmPasteImport, rangeStart, rangeEnd, confirmRangeGenerate,
+      updateStudentName, newStudentNumber, newStudentName, addStudentManually, deleteStudent,
+      loadPreset, addRole, updateRole, deleteRole, capacityTotal, studentCount, capacityShort,
+      toggleSubmission, joinUrl, qrCanvas, submittedList, notSubmittedList, firstChoiceCounts, roleName,
+      running, runAssignment,
+      currentDraft, unassignedRoster, roleAssignedCounts, reassignStudent, finalizeDraft, unlockDraft, deleteDraft,
+      finalDraft, exportCsv, presentGroups, presentUnassigned,
+      confirmModal, askConfirm, resolveConfirm,
+      stuLoading, stuError, stuClass, stuRoles, stuStep, stuNumberInput, stuMatched,
+      stuChoice1, stuChoice2, stuChoice3, stuSubmitting,
+      stuLookup, stuProceedToChoose, stuSelect, stuSubmit, stuEditAgain,
+    };
+  },
+
+  template: `
+  <div :class="studentMode ? 'student-shell' : ''">
+
+    <template v-if="loadingApp">
+      <div class="center-screen"><p>불러오는 중...</p></div>
+    </template>
+
+    <template v-else-if="!firebaseConfigured">
+      <div class="center-screen">
+        <h1>Firebase 설정이 필요합니다</h1>
+        <p class="muted" style="max-width:480px">index.html 상단의 <code>CONFIG.firebase</code> 값을 실제 Firebase 프로젝트 설정으로 교체한 뒤 다시 열어주세요.</p>
+      </div>
+    </template>
+
+    <!-- ==================== 학생 모드 ==================== -->
+    <template v-else-if="studentMode">
+      <header class="topbar"><div class="brand">1P1J</div></header>
+      <main class="content">
+        <div v-if="stuLoading" class="center-screen"><p>불러오는 중...</p></div>
+        <div v-else-if="stuError" class="center-screen"><h2>{{ stuError }}</h2></div>
+        <div v-else>
+          <div class="card">
+            <h2>{{ stuClass?.className }}</h2>
+            <p class="hint">1인 1역 지망 접수</p>
+          </div>
+
+          <div v-if="!stuClass?.submissionOpen && stuStep !== 'done'" class="card center-screen" style="min-height:auto;padding:32px 20px">
+            <h2>접수가 마감되었습니다</h2>
+            <p class="muted">담임 선생님께 문의해주세요.</p>
+          </div>
+
+          <template v-else>
+            <div v-if="stuStep === 'number'" class="card">
+              <h3>학번을 입력하세요</h3>
+              <div class="row" style="margin-top:10px">
+                <input class="input" v-model="stuNumberInput" placeholder="예: 15" @keyup.enter="stuLookup" inputmode="numeric" />
+              </div>
+              <button class="btn btn-primary btn-lg" style="margin-top:14px" @click="stuLookup">확인</button>
+            </div>
+
+            <div v-else-if="stuStep === 'confirm'" class="card center-screen" style="min-height:auto;padding:28px 20px">
+              <h2>{{ stuMatched?.name || '(이름 없음)' }} 학생이 맞나요?</h2>
+              <p class="muted">학번 {{ stuMatched?.number }}</p>
+              <div class="row" style="width:100%;margin-top:10px">
+                <button class="btn" style="flex:1" @click="stuStep='number'">아니요</button>
+                <button class="btn btn-primary" style="flex:1" @click="stuProceedToChoose">네, 맞아요</button>
+              </div>
+            </div>
+
+            <div v-else-if="stuStep === 'choose'" class="card">
+              <h3>1지망 (필수)</h3>
+              <div class="choice-list" style="margin-bottom:16px">
+                <div v-for="r in stuRoles" :key="r.id" class="choice-option" :class="{selected: stuChoice1===r.id}" @click="stuSelect(0, r.id)">
+                  <span>{{ r.name }}</span>
+                  <span v-if="stuChoice1===r.id" class="rank-badge">1지망</span>
+                </div>
+              </div>
+              <h3>2지망 (선택)</h3>
+              <div class="choice-list" style="margin-bottom:16px">
+                <div v-for="r in stuRoles.filter(x=>x.id!==stuChoice1)" :key="r.id" class="choice-option" :class="{selected: stuChoice2===r.id}" @click="stuSelect(1, r.id)">
+                  <span>{{ r.name }}</span>
+                  <span v-if="stuChoice2===r.id" class="rank-badge">2지망</span>
+                </div>
+              </div>
+              <h3>3지망 (선택)</h3>
+              <div class="choice-list" style="margin-bottom:16px">
+                <div v-for="r in stuRoles.filter(x=>x.id!==stuChoice1 && x.id!==stuChoice2)" :key="r.id" class="choice-option" :class="{selected: stuChoice3===r.id}" @click="stuSelect(2, r.id)">
+                  <span>{{ r.name }}</span>
+                  <span v-if="stuChoice3===r.id" class="rank-badge">3지망</span>
+                </div>
+              </div>
+              <button class="btn btn-primary btn-lg" :disabled="!stuChoice1 || stuSubmitting" @click="stuSubmit">제출하기</button>
+            </div>
+
+            <div v-else-if="stuStep === 'done'" class="card center-screen" style="min-height:auto;padding:32px 20px">
+              <h2>제출 완료!</h2>
+              <p class="muted">접수가 마감되기 전까지는 다시 접속해 수정할 수 있어요.</p>
+              <button v-if="stuClass?.submissionOpen" class="btn" style="margin-top:10px" @click="stuEditAgain">지망 다시 수정하기</button>
+            </div>
+          </template>
+        </div>
+      </main>
+    </template>
+
+    <!-- ==================== 교사 모드 ==================== -->
+    <template v-else>
+      <header class="topbar">
+        <div class="brand" @click="go('#/classes')">1P1J</div>
+        <div v-if="user" class="user-box">
+          <span>{{ user.displayName || user.email }}</span>
+          <button class="btn btn-sm" @click="signOutUser">로그아웃</button>
+        </div>
+      </header>
+
+      <main class="content">
+        <!-- 로그인 -->
+        <div v-if="!user" class="center-screen">
+          <h1>1P1J</h1>
+          <p class="muted">1인 1역, 반 전체 만족도를 최대화해서 배정합니다.</p>
+          <button class="btn btn-primary btn-lg" style="max-width:280px" @click="signIn">Google 계정으로 로그인</button>
+        </div>
+
+        <!-- 학급 목록 -->
+        <template v-else-if="route.view === 'classes'">
+          <div class="card">
+            <h2>새 학급 만들기</h2>
+            <div class="row">
+              <input class="input" v-model="newClassName" placeholder="예: 3학년 1반" @keyup.enter="createClass" />
+              <button class="btn btn-primary" @click="createClass">개설</button>
+            </div>
+          </div>
+          <h2 style="margin:20px 0 10px">내 학급</h2>
+          <div v-if="classes.length===0" class="muted">아직 개설한 학급이 없습니다.</div>
+          <div v-for="c in classes" :key="c.id" class="card row-between" style="cursor:pointer" @click="go('#/class/'+c.id)">
+            <div>
+              <strong>{{ c.className }}</strong>
+              <span class="badge" :class="c.submissionOpen ? 'badge-green' : 'badge-gray'" style="margin-left:8px">{{ c.submissionOpen ? '접수중' : '접수마감' }}</span>
+            </div>
+            <button class="btn btn-sm btn-danger" @click.stop="askConfirm('\\''+c.className+'\\' 학급을 삭제할까요? 되돌릴 수 없습니다.', ()=>deleteClass(c.id))">삭제</button>
+          </div>
+        </template>
+
+        <!-- 학급 작업공간 -->
+        <template v-else-if="route.view === 'class' && currentClass">
+          <div class="row-between">
+            <h1>{{ currentClass.className }}</h1>
+            <div class="row">
+              <button class="btn btn-sm" @click="go('#/classes')">← 학급 목록</button>
+            </div>
+          </div>
+
+          <div class="tabs">
+            <div class="tab" :class="{active: activeTab==='roster'}" @click="activeTab='roster'">명단</div>
+            <div class="tab" :class="{active: activeTab==='roles'}" @click="activeTab='roles'">역할·정원</div>
+            <div class="tab" :class="{active: activeTab==='collect'}" @click="activeTab='collect'">지망 접수</div>
+            <div class="tab" :class="{active: activeTab==='assign'}" @click="activeTab='assign'">배정</div>
+          </div>
+
+          <!-- 명단 -->
+          <div v-if="activeTab==='roster'">
+            <div class="card">
+              <h3>붙여넣기로 등록</h3>
+              <p class="hint">엑셀/시트에서 "학번 &lt;탭&gt; 이름" 두 열을 그대로 붙여넣으세요.</p>
+              <textarea class="input" v-model="pasteText" placeholder="1	김민준&#10;2	이서연"></textarea>
+              <div v-if="pasteText.trim()" class="tbl-wrap" style="margin-top:10px">
+                <table class="tbl"><thead><tr><th>학번</th><th>이름</th></tr></thead>
+                <tbody><tr v-for="r in pastePreview" :key="r.number"><td>{{r.number}}</td><td>{{r.name}}</td></tr></tbody></table>
+              </div>
+              <button class="btn btn-primary" style="margin-top:10px" :disabled="pastePreview.length===0" @click="confirmPasteImport">{{pastePreview.length}}명 등록</button>
+            </div>
+
+            <div class="card">
+              <h3>번호 범위로 생성</h3>
+              <div class="row">
+                <input class="input" style="max-width:100px" v-model="rangeStart" placeholder="1" inputmode="numeric" />
+                <span>번 부터</span>
+                <input class="input" style="max-width:100px" v-model="rangeEnd" placeholder="28" inputmode="numeric" />
+                <span>번 까지</span>
+                <button class="btn btn-primary" @click="confirmRangeGenerate">생성</button>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3>학생 개별 추가</h3>
+              <div class="row">
+                <input class="input" style="max-width:100px" v-model="newStudentNumber" placeholder="학번" />
+                <input class="input" v-model="newStudentName" placeholder="이름" @keyup.enter="addStudentManually" />
+                <button class="btn" @click="addStudentManually">추가</button>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3>전체 명단 ({{students.length}}명)</h3>
+              <div class="tbl-wrap">
+                <table class="tbl"><thead><tr><th style="width:80px">학번</th><th>이름</th><th style="width:60px"></th></tr></thead>
+                <tbody>
+                  <tr v-for="s in students" :key="s.number">
+                    <td>{{s.number}}</td>
+                    <td><input class="input" :value="s.name" @change="updateStudentName(s.number, $event.target.value)" /></td>
+                    <td><button class="btn btn-sm btn-danger" @click="askConfirm(s.number+'번 학생을 삭제할까요?', ()=>deleteStudent(s.number))">삭제</button></td>
+                  </tr>
+                </tbody></table>
+              </div>
+            </div>
+          </div>
+
+          <!-- 역할·정원 -->
+          <div v-if="activeTab==='roles'">
+            <div v-if="capacityShort > 0" class="warning-box">
+              <span>역할 정원 총합({{capacityTotal}}명)이 학급 학생 수({{studentCount}}명)보다 적습니다. {{capacityShort}}명이 배정받을 자리가 없습니다.</span>
+            </div>
+            <div class="card">
+              <div class="row-between">
+                <h3>역할 목록 (정원 총합 {{capacityTotal}}명 / 학생 {{studentCount}}명)</h3>
+                <div class="row">
+                  <button class="btn btn-sm" @click="loadPreset">프리셋 불러오기</button>
+                  <button class="btn btn-sm" @click="addRole">역할 추가</button>
+                </div>
+              </div>
+              <div class="tbl-wrap" style="margin-top:10px">
+                <table class="tbl"><thead><tr><th>역할명</th><th style="width:100px">정원</th><th style="width:60px"></th></tr></thead>
+                <tbody>
+                  <tr v-for="r in roles" :key="r.id">
+                    <td><input class="input" :value="r.name" @change="updateRole(r.id, {name: $event.target.value})" /></td>
+                    <td><input class="input" type="number" min="0" :value="r.capacity" @change="updateRole(r.id, {capacity: Number($event.target.value)||0})" /></td>
+                    <td><button class="btn btn-sm btn-danger" @click="askConfirm('\\''+r.name+'\\' 역할을 삭제할까요?', ()=>deleteRole(r.id))">삭제</button></td>
+                  </tr>
+                </tbody></table>
+              </div>
+              <p v-if="roles.length===0" class="hint">아직 역할이 없습니다. 프리셋을 불러오거나 직접 추가하세요.</p>
+            </div>
+          </div>
+
+          <!-- 지망 접수 -->
+          <div v-if="activeTab==='collect'">
+            <div v-if="capacityShort > 0" class="warning-box">
+              <span>역할 정원 총합이 학생 수보다 {{capacityShort}}명 부족합니다.</span>
+              <button class="btn btn-sm" @click="activeTab='roles'">정원 수정하기</button>
+            </div>
+            <div class="card">
+              <div class="row-between">
+                <h3>{{ currentClass.submissionOpen ? '접수 진행중' : '접수 마감됨' }}</h3>
+                <button class="btn" :class="currentClass.submissionOpen ? 'btn-danger' : 'btn-primary'" @click="toggleSubmission">
+                  {{ currentClass.submissionOpen ? '접수 마감하기' : '접수 열기' }}
+                </button>
+              </div>
+              <div v-if="currentClass.submissionOpen" class="qr-box" style="margin-top:16px">
+                <canvas ref="qrCanvas"></canvas>
+                <code class="link-code">{{ joinUrl }}</code>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="stat-grid">
+                <div class="stat-box"><div class="num" style="color:var(--danger)">{{ notSubmittedList.length }}</div><div class="label">미제출</div></div>
+                <div class="stat-box"><div class="num">{{ submittedList.length }}</div><div class="label">제출 완료</div></div>
+                <div class="stat-box"><div class="num">{{ students.length }}</div><div class="label">전체</div></div>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3>역할별 1지망 집중도</h3>
+              <div class="tbl-wrap"><table class="tbl"><tbody>
+                <tr v-for="r in roles" :key="r.id"><td>{{r.name}}</td><td>{{ firstChoiceCounts[r.id] || 0 }}명</td></tr>
+              </tbody></table></div>
+            </div>
+
+            <div class="card">
+              <h3>미제출 학생</h3>
+              <p v-if="notSubmittedList.length===0" class="muted">모두 제출했습니다.</p>
+              <div class="row" v-else>
+                <span v-for="s in notSubmittedList" :key="s.number" class="badge badge-red" style="margin:2px">{{s.number}} {{s.name}}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 배정 -->
+          <div v-if="activeTab==='assign'">
+            <div class="card">
+              <button class="btn btn-primary btn-lg" :disabled="running" @click="runAssignment">
+                {{ running ? '계산 중...' : '배정 실행 (새 배정안 생성)' }}
+              </button>
+              <p class="hint">여러 번 실행해서 결과를 비교할 수 있습니다. 실행할 때마다 새 배정안이 저장됩니다.</p>
+            </div>
+            <h2 style="margin:16px 0 10px">배정안 목록</h2>
+            <div v-if="drafts.length===0" class="muted">아직 생성된 배정안이 없습니다.</div>
+            <div v-for="(d,i) in drafts" :key="d.id" class="draft-card" :class="{final: d.isFinal}" @click="go('#/class/'+route.classId+'/draft/'+d.id)">
+              <div class="row-between">
+                <strong>안 {{ drafts.length - i }} <span v-if="d.isFinal" class="badge badge-green" style="margin-left:6px">최종 확정</span></strong>
+              </div>
+              <p class="hint">1지망 {{d.stats.first}}명, 2지망 {{d.stats.second}}명, 3지망 {{d.stats.third}}명, 미배정 {{d.stats.unassigned}}명</p>
+            </div>
+          </div>
+        </template>
+
+        <!-- 배정안 상세 -->
+        <template v-else-if="route.view === 'draft' && currentDraft">
+          <div class="row-between">
+            <h1>배정안 상세</h1>
+            <div class="row">
+              <button class="btn btn-sm" @click="go('#/class/'+route.classId)">← 배정 목록</button>
+              <button class="btn btn-sm" @click="exportCsv">CSV 내보내기</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="stat-grid">
+              <div class="stat-box"><div class="num">{{currentDraft.stats.first}}</div><div class="label">1지망</div></div>
+              <div class="stat-box"><div class="num">{{currentDraft.stats.second}}</div><div class="label">2지망</div></div>
+              <div class="stat-box"><div class="num">{{currentDraft.stats.third}}</div><div class="label">3지망</div></div>
+              <div class="stat-box"><div class="num">{{currentDraft.stats.unassigned}}</div><div class="label">미배정</div></div>
+            </div>
+            <div class="row" style="margin-top:14px">
+              <button v-if="!currentDraft.isFinal" class="btn btn-primary" @click="finalizeDraft(currentDraft.id)">최종 확정</button>
+              <button v-else class="btn" @click="unlockDraft(currentDraft.id)">확정 해제</button>
+              <button v-if="currentDraft.isFinal" class="btn" @click="go('#/class/'+route.classId+'/present')">발표용 화면 열기</button>
+              <button class="btn btn-danger" @click="askConfirm('이 배정안을 삭제할까요?', ()=>deleteDraft(currentDraft.id))">삭제</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>학생별 배정 (직접 수정 가능)</h3>
+            <div class="tbl-wrap"><table class="tbl">
+              <thead><tr><th>학번</th><th>이름</th><th>지망</th><th>배정된 역할</th></tr></thead>
+              <tbody>
+                <tr v-for="s in students" :key="s.number">
+                  <td>{{s.number}}</td><td>{{s.name}}</td>
+                  <td class="muted">{{ (preferences[s.number]?.choices||[]).map(roleName).join(' > ') || '미제출' }}</td>
+                  <td>
+                    <select class="input" :value="currentDraft.assignments[s.number] || ''" @change="reassignStudent(s.number, $event.target.value)">
+                      <option value="">미배정</option>
+                      <option v-for="r in roles" :key="r.id" :value="r.id">{{r.name}} ({{roleAssignedCounts[r.id]||0}}/{{r.capacity}})</option>
+                    </select>
+                  </td>
+                </tr>
+              </tbody>
+            </table></div>
+          </div>
+
+          <div class="card" v-if="unassignedRoster.length">
+            <h3>미배정 학생 ({{unassignedRoster.length}}명)</h3>
+            <div class="row">
+              <span v-for="s in unassignedRoster" :key="s.number" class="badge" :class="s.submitted ? 'badge-blue' : 'badge-gray'" style="margin:2px">
+                {{s.number}} {{s.name}} {{ s.submitted ? '' : '(미제출)' }}
+              </span>
+            </div>
+          </div>
+        </template>
+
+        <!-- 발표용 화면 -->
+        <template v-else-if="route.view === 'present'">
+          <div class="row-between no-print">
+            <h1>발표용 화면</h1>
+            <div class="row">
+              <button class="btn btn-sm" @click="go('#/class/'+route.classId)">← 돌아가기</button>
+              <button class="btn btn-sm" @click="window.print()">인쇄</button>
+            </div>
+          </div>
+          <div v-if="!finalDraft" class="center-screen"><p>확정된 배정안이 없습니다.</p></div>
+          <template v-else>
+            <div class="present-grid">
+              <div v-for="g in presentGroups" :key="g.role.id" class="present-role">
+                <h3>{{ g.role.name }}</h3>
+                <div class="names">{{ g.names.join(', ') || '-' }}</div>
+              </div>
+            </div>
+            <div v-if="presentUnassigned.length" class="present-role" style="margin-top:16px">
+              <h3>미배정</h3>
+              <div class="names">{{ presentUnassigned.join(', ') }}</div>
+            </div>
+          </template>
+        </template>
+
+        <div v-else class="center-screen"><p>불러오는 중...</p></div>
+      </main>
+    </template>
+
+    <!-- 삭제 확인 모달 -->
+    <div v-if="confirmModal" class="modal-backdrop" @click.self="resolveConfirm(false)">
+      <div class="modal-box">
+        <p>{{ confirmModal.message }}</p>
+        <div class="row" style="justify-content:flex-end;margin-top:16px">
+          <button class="btn" @click="resolveConfirm(false)">취소</button>
+          <button class="btn btn-danger" @click="resolveConfirm(true)">삭제</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast-container no-print">
+      <div v-for="t in toasts" :key="t.id" class="toast" :class="t.type">{{ t.message }}</div>
+    </div>
+  </div>
+  `,
+};
+
+createApp(App).mount("#app");
+</script>
+</body>
+</html>
