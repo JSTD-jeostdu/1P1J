@@ -1085,6 +1085,7 @@ const App = {
     const stuMatched = ref(null);
     const stuChoice1 = ref(""), stuChoice2 = ref(""), stuChoice3 = ref("");
     const stuSubmitting = ref(false);
+    const stuLooking = ref(false);   // 번호 조회 중 (초기 로딩용 stuLoading 과 구분)
 
     async function loadStudentClass() {
       try {
@@ -1100,18 +1101,29 @@ const App = {
     async function stuLookup() {
       const num = stuNumberInput.value.trim();
       if (!num) return;
-      stuLoading.value = true;
+      stuLooking.value = true;
       try {
         const sSnap = await fs.getDoc(fs.doc(studentsCol(studentClassId.value), num));
         if (!sSnap.exists()) { toast("명단에서 번호를 찾을 수 없습니다.", "error"); return; }
         stuMatched.value = { number: num, name: sSnap.data().name || "" };
-        const pSnap = await fs.getDoc(fs.doc(prefsCol(studentClassId.value), num));
-        if (pSnap.exists()) {
-          const c = pSnap.data().choices || [];
-          stuChoice1.value = c[0] || ""; stuChoice2.value = c[1] || ""; stuChoice3.value = c[2] || "";
-        }
+
+        // 이미 낸 지망을 미리 채워 주려는 시도.
+        // preferences 는 교사만 읽을 수 있으므로(보안 규칙) 학생 기기에서는 권한 오류가 나는 게 정상이다.
+        // 여기서 예외가 새어 나가면 확인 화면으로 넘어가지 못하고 번호 입력으로 되돌아가 버리므로
+        // 반드시 따로 삼킨다. 미리 채우기는 어차피 부가 기능이라 실패해도 그냥 빈 상태로 고르면 된다.
+        try {
+          const pSnap = await fs.getDoc(fs.doc(prefsCol(studentClassId.value), num));
+          if (pSnap.exists()) {
+            const c = pSnap.data().choices || [];
+            stuChoice1.value = c[0] || ""; stuChoice2.value = c[1] || ""; stuChoice3.value = c[2] || "";
+          }
+        } catch (e) { /* 권한 없음 — 학생은 원래 못 읽는다. 빈 상태로 진행한다. */ }
+
         stuStep.value = "confirm";
-      } finally { stuLoading.value = false; }
+      } catch (e) {
+        // 이제는 조용히 되돌아가지 않고 이유를 보여 준다
+        toast("번호를 확인하지 못했습니다. 잠시 후 다시 시도해주세요.", "error");
+      } finally { stuLooking.value = false; }
     }
     function stuProceedToChoose() { stuStep.value = "choose"; }
     function stuSelect(rank, roleId) {
@@ -1168,7 +1180,7 @@ const App = {
       finalDraft, exportCsv, presentGroups, presentUnassigned, presentColor,
       confirmModal, askConfirm, resolveConfirm,
       stuLoading, stuError, stuClass, stuRoles, stuStep, stuNumberInput, stuMatched,
-      stuChoice1, stuChoice2, stuChoice3, stuSubmitting,
+      stuChoice1, stuChoice2, stuChoice3, stuSubmitting, stuLooking,
       stuLookup, stuProceedToChoose, stuSelect, stuSubmit, stuEditAgain,
     };
   },
@@ -1211,7 +1223,7 @@ const App = {
                 <p class="muted" style="margin:4px 0 0">우리 반 출석 번호만 입력하면 돼요</p>
               </div>
               <input class="input" style="text-align:center;font-size:28px;font-family:Jua,sans-serif;padding:12px" v-model="stuNumberInput" placeholder="15" @keyup.enter="stuLookup" inputmode="numeric" />
-              <button class="btn btn-primary btn-lg" style="margin-top:14px" @click="stuLookup">확인</button>
+              <button class="btn btn-primary btn-lg" style="margin-top:14px" :disabled="stuLooking" @click="stuLookup">{{ stuLooking ? '확인 중...' : '확인' }}</button>
             </div>
 
             <div v-else-if="stuStep === 'confirm'" class="card">
