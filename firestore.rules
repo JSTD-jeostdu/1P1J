@@ -92,8 +92,10 @@ service cloud.firestore {
       function submissionIsOpen() {
         return get(/databases/$(database)/documents/roleAssign_classes/$(classId)).data.submissionOpen == true;
       }
-      function rosterHasStudent(number) {
-        return exists(/databases/$(database)/documents/roleAssign_classes/$(classId)/students/$(number));
+      // 파라미터 이름으로 number 를 쓰지 않는다 — rules 언어에서 number 는 타입 이름이라
+      // (x is number) 파서를 헷갈리게 할 여지가 있다.
+      function rosterHasStudent(studentNo) {
+        return exists(/databases/$(database)/documents/roleAssign_classes/$(classId)/students/$(studentNo));
       }
 
       match /students/{studentNumber} {

@@ -1142,7 +1142,12 @@ const App = {
         }, { merge: true });
         stuStep.value = "done";
       } catch (e) {
-        toast("제출에 실패했습니다. 접수가 마감되었을 수 있습니다.", "error");
+        // 원인을 단정하지 않는다. permission-denied 하나에도 (a) 접수 마감 (b) 명단에 없는 번호
+        // (c) 보안 규칙이 최신이 아님 이 전부 섞여 있어서, 예전 문구("접수가 마감되었을 수 있습니다")는
+        // 실제로는 규칙 문제일 때도 교사를 엉뚱한 곳으로 보냈다. 오류 코드를 그대로 보여 준다.
+        const code = (e && e.code) ? e.code : "unknown";
+        toast("제출하지 못했어요. 선생님께 이 화면을 보여 주세요. (" + code + ")", "error");
+        console.error("[1P1J] 지망 제출 실패", e);
       } finally { stuSubmitting.value = false; }
     }
     function stuEditAgain() { stuStep.value = "choose"; }
