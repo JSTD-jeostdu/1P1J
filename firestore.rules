@@ -77,6 +77,8 @@ service cloud.firestore {
     // - students 의 문서 ID를 학번 값 자체로 쓴다. preferences 도 마찬가지로 학번을 문서 ID로
     //   써서, "명단에 없는 학번은 제출 불가"를 exists() 로 간단히 검증할 수 있게 한다.
     // - preferences(지망)와 drafts(배정 결과)는 학급 소유 교사만 읽을 수 있다.
+    // - 교사는 구글 로그인 또는 익명 로그인 중 하나를 쓴다. 둘 다 uid 를 받으므로
+    //   ownerUid 기반 소유 판정은 동일하게 동작한다.
     // ============================================================
     match /roleAssign_classes/{classId} {
       allow read: if true; // className, submissionOpen 은 학생도 봐야 하므로 공개 읽기
@@ -107,7 +109,10 @@ service cloud.firestore {
       match /preferences/{studentNumber} {
         allow read: if isOwner(); // 학생은 다른 학생의 지망을 읽을 수 없음
         allow write: if isOwner() || (
-          request.auth == null &&
+          // 로그인 여부는 따지지 않는다. 교사가 익명 로그인으로 앱을 쓰기 시작하면서
+          // 학생 기기에도 auth 세션이 남아 있을 수 있기 때문. 원래도 비로그인 쓰기를
+          // 허용하던 경로라, 실제 방어선은 아래 세 조건(접수 중 · 명단에 있는 학번 ·
+          // 지망 1~3개)이며 보안 수준은 달라지지 않는다.
           submissionIsOpen() &&
           rosterHasStudent(studentNumber) &&
           request.resource.data.choices is list &&
