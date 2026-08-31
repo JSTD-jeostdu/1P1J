@@ -1033,12 +1033,23 @@ const App = {
     function exportCsv() {
       const draft = currentDraft.value || finalDraft.value;
       if (!draft) return toast("내보낼 배정안이 없습니다.", "error");
-      const rows = [["학번", "이름", "배정된 역할", "지망 순위"]];
+      // 배정 결과만이 아니라 학생이 낸 지망 전체를 함께 남긴다.
+      // 배정이 왜 이렇게 나왔는지 나중에 되짚거나, 미배정 학생 자리를 손으로 채울 때 필요하다.
+      // 지망 칸이 비어 있으면 미제출이다 (1지망은 제출 시 필수라 반드시 채워진다).
+      const rows = [["학번", "이름", "배정된 역할", "지망 순위", "1지망", "2지망", "3지망"]];
       students.value.forEach((s) => {
         const roleId = draft.assignments[s.number];
         const choices = preferences.value[s.number]?.choices || [];
         const rank = roleId ? choices.indexOf(roleId) : -1;
-        rows.push([s.number, s.name, roleId ? roleName(roleId) : "미배정", rank >= 0 ? `${rank + 1}지망` : ""]);
+        rows.push([
+          s.number,
+          s.name,
+          roleId ? roleName(roleId) : "미배정",
+          rank >= 0 ? `${rank + 1}지망` : "",
+          choices[0] ? roleName(choices[0]) : "",
+          choices[1] ? roleName(choices[1]) : "",
+          choices[2] ? roleName(choices[2]) : "",
+        ]);
       });
       downloadCsv(`${currentClass.value?.className || "학급"}_배정결과.csv`, rows);
     }
@@ -1750,7 +1761,7 @@ const App = {
       </div>
     </div>
 
-    <footer class="appfoot no-print">Made by 정우쌤 <span class="heart">🙏🏻</span> Inspired by HSBT</footer>
+    <footer class="appfoot no-print">Made by 정우쌤 <span class="heart">🙏🏻</span> Inspired by HSVT</footer>
 
     <div class="toast-container no-print">
       <div v-for="t in toasts" :key="t.id" class="toast" :class="t.type">{{ t.message }}</div>
