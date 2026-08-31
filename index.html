@@ -6,179 +6,443 @@
 <title>1P1J - 1인 1역 배정</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Noto+Sans+KR:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
 <style>
+  /* =====================================================================================
+     디자인 시스템 — "통통 튀는 교실" 컨셉
+     파스텔 베이커리 브랜딩에서 가져온 언어:
+       · 화면 전체를 감싸는 초록 프레임
+       · 상단 노란 히어로 밴드 + 언덕 일러스트 + 마스코트 캐릭터
+       · 두툼한 테두리 + 아래로 떨어지는 단색 그림자 = 장난감 같은 입체감
+       · 크게 굴린 모서리, 알약 모양 버튼/칩
+     색은 전부 아래 CSS 변수로만 관리한다. 새 색을 하드코딩하지 말 것.
+     ===================================================================================== */
   :root {
-    /* 따뜻한 톤의 메인 팔레트 - 교실에 어울리는 차분하면서도 친근한 느낌 */
-    --primary: #6C5CE7;
-    --primary-dark: #5644D6;
-    --primary-light: #EFEBFF;
-    --bg: #FBF8F2;
+    /* 메인: 잔디 초록 */
+    --green: #62C370;
+    --green-dark: #3E9E52;
+    --green-soft: #E6F6E7;
+    --green-line: #B8E4BE;
+    /* 포인트: 버터 노랑 (히어로 밴드) */
+    --butter: #FFE79B;
+    --butter-soft: #FFF7DB;
+    --butter-dark: #E9B93C;
+    /* 포인트: 딸기 핑크 */
+    --pink: #FF8FB1;
+    --pink-dark: #E5628B;
+    --pink-soft: #FFE9F0;
+    /* 포인트: 하늘 파랑 */
+    --sky: #79C6EE;
+    --sky-dark: #4A9FCC;
+    --sky-soft: #E5F4FC;
+    /* 중립 */
+    --bg: #F7F6EE;
     --card: #FFFFFF;
-    --border: #EAE3D6;
-    --text: #2E2A24;
-    --muted: #8D8676;
-    --danger: #E4645A;
-    --danger-bg: #FDECEA;
-    --success: #3FA875;
-    --success-bg: #E9F7EF;
-    --warning: #D98A2B;
-    --warning-bg: #FDF3E3;
-    --gold: #E0A63B;
-    --silver: #9AA0AE;
-    --bronze: #C08552;
-    --shadow-sm: 0 1px 2px rgba(46,38,20,.05), 0 1px 1px rgba(46,38,20,.04);
-    --shadow-md: 0 4px 10px rgba(46,38,20,.06), 0 12px 28px rgba(46,38,20,.06);
+    --line: #E8E3D2;
+    --line-dark: #D6CFB8;
+    --text: #3B3C33;
+    --muted: #918D7C;
+    /* 상태 */
+    --danger: #F26B60;
+    --danger-dark: #D24A3F;
+    --danger-soft: #FFEAE7;
+    --gold: #F3B33D;
+    /* 통통 튀는 이징 — 살짝 오버슈트해서 튕기는 느낌을 준다 */
+    --boing: cubic-bezier(.34, 1.56, .64, 1);
   }
+
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
   body {
     font-family: "Noto Sans KR", -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
     background: var(--bg);
-    background-image: radial-gradient(circle at 8% 0%, rgba(108,92,231,.06), transparent 45%), radial-gradient(circle at 100% 15%, rgba(224,166,59,.06), transparent 40%);
+    /* 은은한 도트 패턴 — 종이 위 스티커 같은 바탕 */
+    background-image:
+      radial-gradient(circle at 50% 50%, rgba(98,195,112,.10) 1.6px, transparent 1.7px),
+      radial-gradient(circle at 12% 0%, rgba(255,231,155,.35), transparent 42%);
+    background-size: 22px 22px, 100% 100%;
     background-attachment: fixed;
     color: var(--text);
-    line-height: 1.6;
+    line-height: 1.65;
     letter-spacing: -0.01em;
   }
+  /* 화면을 감싸는 초록 프레임 — 이 앱의 시그니처. 스크롤해도 고정된다. */
+  body::after {
+    content: ""; position: fixed; inset: 0; z-index: 900; pointer-events: none;
+    border: 9px solid var(--green);
+  }
   #app { min-height: 100vh; display: flex; flex-direction: column; }
-  a { color: var(--primary); }
-  .brand-font { font-family: "Gowun Dodum", "Noto Sans KR", sans-serif; }
+  a { color: var(--green-dark); }
+  .brand-font, h1, h2, .hero-title, .stat-box .num, .tab-step {
+    font-family: "Jua", "Noto Sans KR", sans-serif; font-weight: 400; letter-spacing: 0;
+  }
+
+  /* ------------------------------ 상단바 ------------------------------ */
   header.topbar {
-    background: rgba(255,255,255,.82);
-    backdrop-filter: saturate(180%) blur(10px);
-    border-bottom: 1px solid var(--border);
-    padding: 14px 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    flex-wrap: wrap;
+    background: #fff;
+    border-bottom: 2px solid var(--line);
+    padding: 12px 26px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; flex-wrap: wrap;
     position: sticky; top: 0; z-index: 50;
   }
-  header.topbar .brand { display: flex; align-items: center; gap: 9px; cursor: pointer; }
+  header.topbar .brand { display: flex; align-items: center; gap: 10px; cursor: pointer; }
   header.topbar .brand-mark {
-    width: 30px; height: 30px; border-radius: 9px; flex-shrink: 0;
-    background: linear-gradient(135deg, var(--primary), #9B8CFF);
+    width: 36px; height: 36px; border-radius: 13px; flex-shrink: 0;
+    background: var(--green);
     display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 3px 8px rgba(108,92,231,.35);
+    box-shadow: 0 3px 0 var(--green-dark);
+    transition: transform .25s var(--boing);
   }
-  header.topbar .brand-mark svg { width: 16px; height: 16px; }
-  header.topbar .brand-text { font-weight: 700; font-size: 19px; color: var(--primary-dark); font-family: "Gowun Dodum", "Noto Sans KR", sans-serif; }
+  header.topbar .brand:hover .brand-mark { transform: translateY(-2px) rotate(-8deg); }
+  header.topbar .brand-mark svg { width: 19px; height: 19px; }
+  header.topbar .brand-text {
+    font-family: "Jua", "Noto Sans KR", sans-serif; font-size: 23px; color: var(--green-dark);
+  }
   header.topbar .user-box { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--muted); }
-  main.content { flex: 1; padding: 28px 20px; max-width: 1080px; width: 100%; margin: 0 auto; }
-  .student-shell main.content { max-width: 480px; padding: 24px 18px; }
+
+  /* ------------------------------ 히어로 밴드 ------------------------------ */
+  /* 노란 하늘 + 초록 언덕 + 마스코트. HeroBand 컴포넌트가 이 마크업을 그린다. */
+  .hero {
+    position: relative; overflow: hidden;
+    background: linear-gradient(180deg, var(--butter-soft) 0%, var(--butter) 100%);
+    padding: 30px 20px 78px;
+    text-align: center;
+    border-bottom: 2px solid var(--line);
+  }
+  .hero-hills { position: absolute; left: 0; right: 0; bottom: -1px; width: 100%; height: 110px; display: block; }
+  .hero-inner { position: relative; z-index: 2; }
+  .hero-title { font-size: 38px; margin: 0; color: #4A5A3E; text-shadow: 0 2px 0 rgba(255,255,255,.6); }
+  .hero-sub { margin: 4px 0 0; font-size: 14.5px; color: #7E7A5E; font-weight: 500; }
+  .hero-actions { margin-top: 14px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  /* 마스코트 — 좁은 화면에서는 자리를 못 잡으니 숨긴다 */
+  .hero-char {
+    position: absolute; bottom: 14px; z-index: 3; line-height: 1; user-select: none;
+    font-size: 52px;
+    filter: drop-shadow(0 5px 6px rgba(90,80,40,.2));
+    animation: float-y 3.4s ease-in-out infinite;
+  }
+  .hero-char.left { left: 6%; }
+  .hero-char.right { right: 6%; font-size: 58px; animation-delay: .9s; }
+  @media (max-width: 900px) { .hero-char { display: none; } }
+
+  /* ------------------------------ 레이아웃 ------------------------------ */
+  main.content { flex: 1; padding: 26px 20px 10px; max-width: 1080px; width: 100%; margin: 0 auto; }
+  .student-shell main.content { max-width: 520px; padding: 22px 18px 10px; }
+
   .card {
     background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 18px;
-    padding: 22px;
+    border: 2px solid var(--line);
+    border-radius: 24px;
+    padding: 24px;
     margin-bottom: 18px;
-    box-shadow: var(--shadow-sm);
-    transition: box-shadow .18s ease;
+    box-shadow: 0 4px 0 var(--line), 0 12px 24px rgba(80,90,60,.05);
+    animation: pop-in .4s var(--boing) both;
   }
-  h1 { font-size: 25px; margin: 0 0 12px; font-weight: 700; letter-spacing: -0.02em; }
-  h2 { font-size: 19px; margin: 0 0 12px; font-weight: 700; letter-spacing: -0.01em; }
-  h3 { font-size: 15px; margin: 0 0 10px; color: var(--muted); font-weight: 600; }
-  p.hint { color: var(--muted); font-size: 13px; margin: 6px 0 0; line-height: 1.55; }
+  .card.tight { padding: 18px 20px; }
+
+  h1 { font-size: 30px; margin: 0 0 12px; color: var(--text); }
+  h2 { font-size: 22px; margin: 0 0 12px; color: var(--text); }
+  h3 {
+    font-size: 15px; margin: 0 0 10px; color: var(--muted); font-weight: 700;
+    display: flex; align-items: center; gap: 7px;
+  }
+  p.hint { color: var(--muted); font-size: 13px; margin: 7px 0 0; line-height: 1.6; }
+  .muted { color: var(--muted); }
+
+  /* ------------------------------ 버튼 ------------------------------ */
+  /* 아래로 떨어지는 단색 그림자 → 누르면 그림자가 사라지며 내려앉는다 (물리적인 느낌) */
   .btn {
     display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-    border: 1px solid var(--border); background: #fff; color: var(--text);
-    padding: 9px 17px; border-radius: 11px; font-size: 14px; font-weight: 500; cursor: pointer;
-    min-height: 42px; transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
-    font-family: inherit;
+    border: 2px solid var(--line-dark); background: #fff; color: var(--text);
+    padding: 9px 18px; border-radius: 999px; font-size: 14px; font-weight: 700; cursor: pointer;
+    min-height: 44px; font-family: inherit; white-space: nowrap;
+    box-shadow: 0 3px 0 var(--line-dark);
+    transition: transform .18s var(--boing), box-shadow .18s var(--boing), background .15s ease;
   }
-  .btn:hover { background: #FAF8F4; transform: translateY(-1px); box-shadow: var(--shadow-sm); }
-  .btn:active { transform: translateY(0); }
-  .btn:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; }
-  .btn-primary {
-    background: linear-gradient(135deg, var(--primary), #7C6EF0); border-color: transparent; color: #fff;
-    box-shadow: 0 4px 12px rgba(108,92,231,.32);
-  }
-  .btn-primary:hover { background: linear-gradient(135deg, var(--primary-dark), var(--primary)); box-shadow: 0 6px 16px rgba(108,92,231,.4); }
-  .btn-danger { color: var(--danger); border-color: #F6D3CF; }
-  .btn-danger:hover { background: var(--danger-bg); }
-  .btn-sm { padding: 6px 12px; min-height: 32px; font-size: 13px; border-radius: 9px; }
-  .btn-lg { padding: 15px 22px; min-height: 54px; font-size: 16px; width: 100%; border-radius: 14px; font-weight: 700; }
-  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-  .row-between { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .btn:hover { background: var(--green-soft); transform: translateY(-2px); box-shadow: 0 5px 0 var(--line-dark); }
+  .btn:active { transform: translateY(3px); box-shadow: 0 0 0 var(--line-dark); }
+  .btn:disabled { opacity: .45; cursor: not-allowed; transform: none; box-shadow: 0 3px 0 var(--line-dark); }
+  .btn-primary { background: var(--green); border-color: var(--green-dark); color: #fff; box-shadow: 0 3px 0 var(--green-dark); }
+  .btn-primary:hover { background: #6FD07D; box-shadow: 0 5px 0 var(--green-dark); }
+  .btn-primary:active { box-shadow: 0 0 0 var(--green-dark); }
+  .btn-pink { background: var(--pink); border-color: var(--pink-dark); color: #fff; box-shadow: 0 3px 0 var(--pink-dark); }
+  .btn-pink:hover { background: #FF9FBD; box-shadow: 0 5px 0 var(--pink-dark); }
+  .btn-pink:active { box-shadow: 0 0 0 var(--pink-dark); }
+  .btn-danger { color: var(--danger-dark); border-color: #F3BDB6; background: #fff; box-shadow: 0 3px 0 #F3BDB6; }
+  .btn-danger:hover { background: var(--danger-soft); box-shadow: 0 5px 0 #F3BDB6; }
+  .btn-danger:active { box-shadow: 0 0 0 #F3BDB6; }
+  .btn-sm { padding: 5px 13px; min-height: 34px; font-size: 13px; box-shadow: 0 2px 0 var(--line-dark); }
+  .btn-sm:hover { transform: translateY(-1px); box-shadow: 0 3px 0 var(--line-dark); }
+  .btn-sm.btn-danger { box-shadow: 0 2px 0 #F3BDB6; }
+  .btn-sm.btn-danger:hover { box-shadow: 0 3px 0 #F3BDB6; }
+  .btn-lg { padding: 15px 24px; min-height: 58px; font-size: 17px; width: 100%; }
+
+  .row { display: flex; gap: 9px; align-items: center; flex-wrap: wrap; }
+  .row-between { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+  /* ------------------------------ 입력 ------------------------------ */
   .input, select.input, textarea.input {
-    border: 1.5px solid var(--border); border-radius: 11px; padding: 10px 13px; font-size: 14px;
-    font-family: inherit; width: 100%; background: #fff; color: var(--text); transition: border-color .12s ease, box-shadow .12s ease;
+    border: 2px solid var(--line); border-radius: 14px; padding: 11px 15px; font-size: 14.5px;
+    font-family: inherit; width: 100%; background: #fff; color: var(--text);
+    transition: border-color .15s ease, box-shadow .15s ease;
   }
-  .input:focus, select.input:focus, textarea.input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
-  textarea.input { resize: vertical; min-height: 90px; }
-  table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
-  table.tbl th, table.tbl td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); }
-  table.tbl th { color: var(--muted); font-weight: 600; font-size: 12.5px; text-transform: uppercase; letter-spacing: .03em; }
+  .input:focus, select.input:focus, textarea.input:focus {
+    outline: none; border-color: var(--green); box-shadow: 0 0 0 4px var(--green-soft);
+  }
+  .input::placeholder { color: #BFBAA8; }
+  textarea.input { resize: vertical; min-height: 96px; line-height: 1.7; }
+
+  /* ------------------------------ 표 ------------------------------ */
+  table.tbl { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; }
+  table.tbl th, table.tbl td { text-align: left; padding: 11px 12px; border-bottom: 2px dotted var(--line); }
+  table.tbl th { color: var(--muted); font-weight: 700; font-size: 12.5px; letter-spacing: .02em; }
   table.tbl tr:last-child td { border-bottom: none; }
+  table.tbl tbody tr { transition: background .15s ease; }
+  table.tbl tbody tr:hover { background: var(--butter-soft); }
   .tbl-wrap { overflow-x: auto; }
+
+  /* ------------------------------ 뱃지 ------------------------------ */
   .badge {
-    display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700;
+    display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 700;
+    border: 2px solid transparent;
   }
-  .badge-green { background: var(--success-bg); color: #1F7A4D; }
-  .badge-gray { background: #F1EDE3; color: var(--muted); }
-  .badge-blue { background: var(--primary-light); color: var(--primary-dark); }
-  .badge-red { background: var(--danger-bg); color: #B94339; }
+  .badge-green { background: var(--green-soft); color: var(--green-dark); border-color: var(--green-line); }
+  .badge-gray { background: #F2EFE4; color: var(--muted); border-color: var(--line); }
+  .badge-blue { background: var(--sky-soft); color: var(--sky-dark); border-color: #BFE3F5; }
+  .badge-red { background: var(--danger-soft); color: var(--danger-dark); border-color: #F8CDC7; }
+  .badge-pink { background: var(--pink-soft); color: var(--pink-dark); border-color: #FFC9DA; }
+  /* 카드 위에 얹는 리본 뱃지 (레퍼런스의 NEW/BEST 스타일) */
+  .ribbon {
+    position: absolute; top: 14px; right: 16px; z-index: 2;
+    background: var(--pink); color: #fff; font-size: 11.5px;
+    padding: 3px 12px; border-radius: 999px; box-shadow: 0 2px 0 var(--pink-dark);
+    font-family: "Jua", sans-serif; letter-spacing: .04em;
+  }
+
+  /* ------------------------------ 경고 박스 ------------------------------ */
   .warning-box {
-    background: var(--warning-bg); border: 1px solid #F3D9A4; color: #92600E;
-    padding: 14px 16px; border-radius: 13px; font-size: 13.5px; margin-bottom: 14px;
-    display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;
+    background: var(--butter-soft); border: 2px solid var(--butter); color: #8A6410;
+    padding: 15px 18px; border-radius: 18px; font-size: 13.5px; margin-bottom: 16px;
+    display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
+    box-shadow: 0 3px 0 var(--butter);
   }
-  .tabs { display: flex; gap: 4px; border-bottom: 1.5px solid var(--border); margin-bottom: 20px; flex-wrap: wrap; }
+
+  /* ------------------------------ 탭 (스텝 인디케이터) ------------------------------ */
+  .tabs {
+    display: flex; gap: 6px; background: #fff; border: 2px solid var(--line);
+    border-radius: 999px; padding: 6px; margin-bottom: 22px; overflow-x: auto;
+    box-shadow: 0 4px 0 var(--line);
+  }
   .tab {
-    padding: 11px 16px; cursor: pointer; font-size: 14.5px; font-weight: 500; color: var(--muted);
-    border-bottom: 2.5px solid transparent; margin-bottom: -1.5px; transition: color .12s ease, border-color .12s ease;
+    flex: 1 0 auto; display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 11px 16px; border-radius: 999px; cursor: pointer; white-space: nowrap;
+    font-size: 14.5px; font-weight: 700; color: var(--muted);
+    transition: all .2s var(--boing);
   }
-  .tab:hover { color: var(--text); }
-  .tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 700; }
-  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 12px; }
-  .stat-box { background: #FAF8F3; border: 1px solid var(--border); border-radius: 13px; padding: 14px; text-align: center; }
-  .stat-box .num { font-size: 26px; font-weight: 900; color: var(--primary-dark); font-family: "Gowun Dodum", "Noto Sans KR", sans-serif; }
-  .stat-box .label { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
-  .choice-list { display: flex; flex-direction: column; gap: 9px; }
+  .tab .tab-step {
+    width: 23px; height: 23px; border-radius: 50%; flex-shrink: 0;
+    background: var(--line); color: #fff; font-size: 13px;
+    display: flex; align-items: center; justify-content: center; line-height: 1;
+    transition: background .2s ease;
+  }
+  .tab:hover { color: var(--text); background: var(--green-soft); }
+  .tab.active { background: var(--green); color: #fff; box-shadow: 0 3px 0 var(--green-dark); transform: translateY(-2px); }
+  .tab.active .tab-step { background: rgba(255,255,255,.4); }
+
+  /* ------------------------------ 통계 박스 ------------------------------ */
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(112px, 1fr)); gap: 12px; }
+  .stat-box {
+    background: var(--green-soft); border: 2px solid var(--green-line); border-radius: 20px;
+    padding: 16px 12px; text-align: center; box-shadow: 0 3px 0 var(--green-line);
+    transition: transform .2s var(--boing);
+  }
+  .stat-box:hover { transform: translateY(-3px); }
+  .stat-box .num { font-size: 32px; line-height: 1.1; color: var(--green-dark); }
+  .stat-box .label { font-size: 12.5px; color: var(--muted); margin-top: 3px; font-weight: 700; }
+  /* 지망 순위별 색 구분 — 한눈에 읽히도록 */
+  .stat-box.s1 { background: var(--butter-soft); border-color: var(--butter); box-shadow: 0 3px 0 var(--butter); }
+  .stat-box.s1 .num { color: var(--butter-dark); }
+  .stat-box.s2 { background: var(--sky-soft); border-color: #BFE3F5; box-shadow: 0 3px 0 #BFE3F5; }
+  .stat-box.s2 .num { color: var(--sky-dark); }
+  .stat-box.s3 { background: var(--pink-soft); border-color: #FFC9DA; box-shadow: 0 3px 0 #FFC9DA; }
+  .stat-box.s3 .num { color: var(--pink-dark); }
+  .stat-box.s0 { background: #F2EFE4; border-color: var(--line); box-shadow: 0 3px 0 var(--line); }
+  .stat-box.s0 .num { color: var(--muted); }
+
+  /* ------------------------------ 지망 선택 카드 (학생 화면) ------------------------------ */
+  .choice-list { display: flex; flex-direction: column; gap: 10px; }
   .choice-option {
-    border: 1.5px solid var(--border); border-radius: 13px; padding: 14px 16px; background: #fff;
-    display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-size: 15.5px; font-weight: 500;
-    transition: all .12s ease;
+    border: 2px solid var(--line); border-radius: 20px; padding: 14px 18px; background: #fff;
+    display: flex; justify-content: space-between; align-items: center; gap: 10px;
+    cursor: pointer; font-size: 16px; font-weight: 700;
+    box-shadow: 0 3px 0 var(--line);
+    transition: transform .2s var(--boing), box-shadow .2s var(--boing), border-color .15s, background .15s;
   }
-  .choice-option:hover { border-color: #D8CCFF; transform: translateY(-1px); }
-  .choice-option.selected { border-color: var(--primary); background: var(--primary-light); box-shadow: 0 3px 10px rgba(108,92,231,.15); }
+  .choice-option:hover { transform: translateY(-3px) rotate(-.7deg); border-color: var(--green-line); box-shadow: 0 6px 0 var(--green-soft); }
+  .choice-option:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--line); }
+  .choice-option .role-emoji { font-size: 21px; margin-right: 9px; display: inline-block; }
+  .choice-option:hover .role-emoji { animation: wiggle .55s ease-in-out; }
   .choice-option .rank-badge {
     font-size: 12px; font-weight: 700; color: #fff; background: var(--muted);
-    padding: 3px 10px; border-radius: 999px;
+    padding: 4px 12px; border-radius: 999px; flex-shrink: 0;
+    animation: pop-in .3s var(--boing) both;
   }
-  .choice-option.rank1.selected .rank-badge { background: var(--gold); }
-  .choice-option.rank2.selected .rank-badge { background: var(--silver); }
-  .choice-option.rank3.selected .rank-badge { background: var(--bronze); }
-  .toast-container { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 8px; z-index: 999; width: 90%; max-width: 420px; }
+  .choice-option.rank1.selected { border-color: var(--butter-dark); background: var(--butter-soft); box-shadow: 0 4px 0 var(--butter-dark); }
+  .choice-option.rank1.selected .rank-badge { background: var(--butter-dark); }
+  .choice-option.rank2.selected { border-color: var(--sky-dark); background: var(--sky-soft); box-shadow: 0 4px 0 var(--sky-dark); }
+  .choice-option.rank2.selected .rank-badge { background: var(--sky-dark); }
+  .choice-option.rank3.selected { border-color: var(--pink-dark); background: var(--pink-soft); box-shadow: 0 4px 0 var(--pink-dark); }
+  .choice-option.rank3.selected .rank-badge { background: var(--pink-dark); }
+
+  /* ------------------------------ 학급/배정안 카드 ------------------------------ */
+  .draft-card {
+    position: relative;
+    border: 2px solid var(--line); border-radius: 20px; padding: 16px 20px; margin-bottom: 12px;
+    cursor: pointer; background: #fff; box-shadow: 0 3px 0 var(--line);
+    transition: transform .2s var(--boing), box-shadow .2s var(--boing), border-color .15s;
+  }
+  .draft-card:hover { transform: translateY(-3px); border-color: var(--green-line); box-shadow: 0 6px 0 var(--green-soft); }
+  .draft-card.final { border-color: var(--green); background: var(--green-soft); box-shadow: 0 4px 0 var(--green); }
+  .class-card { position: relative; cursor: pointer; transition: transform .2s var(--boing), box-shadow .2s var(--boing), border-color .15s; }
+  .class-card:hover {
+    transform: translateY(-4px) rotate(-.5deg); border-color: var(--green-line);
+    box-shadow: 0 8px 0 var(--green-soft), 0 16px 28px rgba(80,90,60,.08);
+  }
+  .class-card .class-emoji { font-size: 30px; line-height: 1; }
+
+  /* ------------------------------ 사용법(튜토리얼) ------------------------------ */
+  .step-card {
+    display: flex; gap: 16px; align-items: flex-start;
+    border: 2px solid var(--line); border-radius: 22px; background: #fff;
+    padding: 18px 20px; margin-bottom: 12px;
+    box-shadow: 0 3px 0 var(--line);
+    animation: pop-in .4s var(--boing) both;
+  }
+  .step-card .step-num {
+    flex-shrink: 0; width: 42px; height: 42px; border-radius: 50%;
+    background: var(--green); color: #fff; font-family: "Jua", sans-serif; font-size: 21px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 3px 0 var(--green-dark);
+  }
+  /* 학생이 하는 일은 파란색 계열로 구분한다 */
+  .step-card.for-student .step-num { background: var(--sky); box-shadow: 0 3px 0 var(--sky-dark); }
+  .step-card .step-body { min-width: 0; }
+  .step-card h3 { color: var(--text); font-size: 17px; margin: 6px 0 6px; font-weight: 700; }
+  .step-card p { margin: 0; font-size: 14px; color: var(--muted); line-height: 1.75; }
+  .step-card .tip {
+    margin-top: 10px; font-size: 13px; color: var(--green-dark);
+    background: var(--green-soft); border-radius: 13px; padding: 9px 13px; line-height: 1.65;
+  }
+  .step-card.for-student .tip { color: var(--sky-dark); background: var(--sky-soft); }
+  .faq { border-top: 2px dotted var(--line); padding-top: 16px; margin-top: 16px; }
+  .faq:first-child { border-top: none; padding-top: 0; margin-top: 0; }
+  .faq strong { display: block; font-size: 15px; margin-bottom: 5px; }
+  .faq p { margin: 0; font-size: 14px; color: var(--muted); line-height: 1.75; }
+
+  /* ------------------------------ 빈 상태 ------------------------------ */
+  .empty-state { text-align: center; padding: 34px 20px; color: var(--muted); }
+  .empty-state .face { font-size: 44px; display: block; margin-bottom: 8px; animation: float-y 3s ease-in-out infinite; }
+
+  /* ------------------------------ 토스트 ------------------------------ */
+  .toast-container {
+    position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; gap: 9px; z-index: 999; width: 90%; max-width: 420px;
+  }
   .toast {
-    background: #2E2A24; color: #fff; padding: 13px 18px; border-radius: 12px; font-size: 14px;
-    box-shadow: 0 8px 24px rgba(0,0,0,.18);
+    background: var(--text); color: #fff; padding: 14px 20px; border-radius: 999px; font-size: 14px;
+    font-weight: 700; text-align: center;
+    box-shadow: 0 8px 22px rgba(0,0,0,.2);
+    animation: pop-in .35s var(--boing) both;
   }
   .toast.error { background: var(--danger); }
-  .toast.success { background: var(--success); }
-  .center-screen { min-height: 60vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 14px; }
-  .draft-card { border: 1.5px solid var(--border); border-radius: 14px; padding: 15px 18px; margin-bottom: 10px; cursor: pointer; background: #fff; transition: all .12s ease; }
-  .draft-card:hover { border-color: var(--primary); transform: translateY(-1px); box-shadow: var(--shadow-sm); }
-  .draft-card.final { border-color: var(--success); background: var(--success-bg); }
+  .toast.success { background: var(--green-dark); }
+
+  /* ------------------------------ 화면 중앙 / 모달 ------------------------------ */
+  .center-screen { min-height: 58vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 14px; }
   .modal-backdrop {
-    position: fixed; inset: 0; background: rgba(46,38,20,.4); backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: center; z-index: 998; padding: 16px;
+    position: fixed; inset: 0; background: rgba(59,60,51,.42); backdrop-filter: blur(3px);
+    display: flex; align-items: center; justify-content: center; z-index: 998; padding: 16px;
   }
-  .modal-box { background: #fff; border-radius: 18px; padding: 24px; max-width: 420px; width: 100%; box-shadow: var(--shadow-md); }
-  .present-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
-  .present-role { border: 1.5px solid var(--border); border-radius: 16px; padding: 18px; background: #fff; border-top: 5px solid var(--primary); box-shadow: var(--shadow-sm); }
-  .present-role h3 { color: var(--text); font-size: 18px; margin-bottom: 10px; font-weight: 700; }
-  .present-role .names { font-size: 20px; font-weight: 700; line-height: 1.8; }
-  .muted { color: var(--muted); }
-  .qr-box { display: flex; flex-direction: column; align-items: center; gap: 10px; }
-  .qr-box canvas { border-radius: 14px; border: 1px solid var(--border); padding: 10px; background: #fff; }
-  code.link-code { background: #F4F0E6; padding: 9px 12px; border-radius: 9px; font-size: 13px; word-break: break-all; }
-  footer.appfoot { text-align: center; color: var(--muted); font-size: 12.5px; padding: 26px 16px 22px; }
-  footer.appfoot .heart { color: #E4645A; }
+  .modal-box {
+    background: #fff; border: 3px solid var(--line); border-radius: 28px; padding: 26px;
+    max-width: 420px; width: 100%; box-shadow: 0 10px 0 var(--line-dark), 0 24px 44px rgba(0,0,0,.16);
+    animation: pop-in .34s var(--boing) both; text-align: center;
+  }
+
+  /* ------------------------------ 발표용 화면 ------------------------------ */
+  .present-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 18px; }
+  .present-role {
+    border: 2px solid var(--line); border-radius: 24px; padding: 20px; background: #fff;
+    border-top: 9px solid var(--green); box-shadow: 0 4px 0 var(--line);
+    animation: pop-in .45s var(--boing) both;
+  }
+  .present-role h3 { color: var(--text); font-size: 19px; margin-bottom: 12px; font-weight: 700; }
+  .present-role .names { font-size: 20px; font-weight: 700; line-height: 1.85; }
+
+  /* ------------------------------ QR / 링크 ------------------------------ */
+  .qr-box { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .qr-box canvas {
+    border-radius: 20px; border: 3px solid var(--green); padding: 12px; background: #fff;
+    box-shadow: 0 4px 0 var(--green-line);
+  }
+  code.link-code {
+    background: var(--butter-soft); border: 2px dashed var(--butter); color: #8A6410;
+    padding: 10px 14px; border-radius: 14px; font-size: 13px; word-break: break-all; text-align: center;
+  }
+
+  footer.appfoot { text-align: center; color: var(--muted); font-size: 12.5px; padding: 28px 16px 26px; }
+  footer.appfoot .heart { color: var(--pink); }
+
+  /* ------------------------------ 애니메이션 ------------------------------ */
+  /* 이 세 가지를 재사용한다. 새로 만들기 전에 있는 걸 먼저 쓸 것. */
+  @keyframes pop-in {
+    0%   { opacity: 0; transform: translateY(10px) scale(.96); }
+    60%  { opacity: 1; transform: translateY(-3px) scale(1.01); }
+    100% { opacity: 1; transform: none; }
+  }
+  @keyframes float-y {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-9px); }
+  }
+  @keyframes wiggle {
+    0%, 100% { transform: rotate(0deg); }
+    25%      { transform: rotate(-11deg); }
+    75%      { transform: rotate(11deg); }
+  }
+  /* 움직임 최소화를 켠 사용자에게는 전부 끈다 */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: .001ms !important; animation-iteration-count: 1 !important;
+      transition-duration: .001ms !important;
+    }
+  }
+
+  /* ------------------------------ 반응형 ------------------------------ */
+  @media (max-width: 640px) {
+    body::after { border-width: 6px; }
+    header.topbar { padding: 8px 13px; }
+    header.topbar .brand-text { font-size: 20px; }
+    /* 버튼이 늘어나면 상단바가 서너 줄로 감겨 화면을 잡아먹는다. 좁은 화면에서는 압축한다. */
+    header.topbar .user-box { gap: 6px; font-size: 13px; }
+    header.topbar .user-box .btn-sm { padding: 4px 11px; min-height: 32px; font-size: 12.5px; }
+    header.topbar .user-box .badge { max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    /* 계정 연결은 학급 목록 배너에서도 할 수 있으므로 상단바에서는 뺀다 */
+    header.topbar .link-btn { display: none; }
+    main.content { padding: 18px 14px 10px; }
+    .card { padding: 18px; border-radius: 20px; }
+    .hero { padding: 24px 16px 62px; }
+    .hero-title { font-size: 28px; }
+    .hero-hills { height: 84px; }
+    h1 { font-size: 24px; }
+    .tab { padding: 10px 13px; font-size: 13.5px; }
+  }
+
   @media print {
-    header.topbar, .no-print, footer.appfoot { display: none !important; }
-    body { background: #fff; }
+    header.topbar, .no-print, footer.appfoot, .hero { display: none !important; }
+    body { background: #fff; background-image: none; }
+    body::after { display: none; }
+    .present-role { box-shadow: none; break-inside: avoid; animation: none; }
   }
 </style>
 </head>
@@ -213,19 +477,25 @@ const CONFIG = {
   // 기존 앱(조회 도우미) 데이터와 충돌하지 않도록 한다.
   collectionPrefix: "roleAssign_",
   // 역할 설정 화면 진입 시 기본 제공되는 프리셋 (교사가 자유롭게 수정/삭제 가능)
+  // 배열에 적은 순서가 그대로 화면 표시 순서가 된다 (loadPreset 이 인덱스를 order 로 저장).
+  // 정원 총합 28명 — 학급 인원에 맞춰 capacity 를 조절해서 쓰면 된다.
   rolePresets: [
-    { name: "학습부", capacity: 2 },
-    { name: "급식부", capacity: 3 },
-    { name: "칠판부", capacity: 2 },
-    { name: "청소부", capacity: 4 },
-    { name: "도서부", capacity: 2 },
-    { name: "체육부", capacity: 2 },
-    { name: "분리수거부", capacity: 2 },
-    { name: "환경미화부", capacity: 2 },
-    { name: "우유급식부", capacity: 2 },
-    { name: "방송부", capacity: 2 },
-    { name: "정보부", capacity: 1 },
-    { name: "실내화정리부", capacity: 2 },
+    { name: "회장", capacity: 1 },
+    { name: "부회장", capacity: 1 },
+    { name: "출석부 담당", capacity: 1 },
+    { name: "게시판 담당", capacity: 1 },
+    { name: "출석체크 담당", capacity: 1 },
+    { name: "휴지, 우산 관리 담당", capacity: 1 },
+    { name: "칠판 담당", capacity: 5 },
+    { name: "수리접수 담당", capacity: 1 },
+    { name: "청소 담당", capacity: 6 },
+    { name: "정보 도우미", capacity: 1 },
+    { name: "학급 일정 담당", capacity: 2 },
+    { name: "핸드폰 관리", capacity: 1 },
+    { name: "학급 업무 담당", capacity: 2 },
+    { name: "가정통신문 담당", capacity: 2 },
+    { name: "에너지 지킴이", capacity: 1 },
+    { name: "보건 도우미", capacity: 1 },
   ],
 };
 
@@ -345,6 +615,27 @@ function shuffleArray(arr) {
 }
 
 // ------------------------------ 명단 붙여넣기 파싱 ------------------------------
+// 역할 이름에서 키워드를 찾아 이모지를 고른다.
+// 역할 이름은 교사가 자유롭게 적으므로 정확히 일치시키지 않고 "포함" 검사로 느슨하게 맞춘다.
+// 앞에 있는 항목이 먼저 매칭되므로 더 구체적인 키워드를 위쪽에 둔다.
+const ROLE_EMOJI = [
+  ["분리수거", "♻️"], ["재활용", "♻️"], ["우유", "🥛"], ["급식", "🍚"], ["급수", "💧"],
+  ["학습", "📚"], ["도서", "📖"], ["칠판", "🖍️"], ["청소", "🧹"], ["환경", "🌱"], ["미화", "🌱"],
+  ["체육", "⚽"], ["운동", "⚽"], ["방송", "🎤"], ["음악", "🎵"], ["정보", "💻"], ["컴퓨터", "💻"],
+  ["실내화", "👟"], ["신발", "👟"], ["사물함", "🗄️"], ["게시", "📌"], ["알림", "📣"],
+  ["출석체크", "✅"], ["출석", "📝"], ["시간표", "⏰"], ["일정", "📅"], ["시간", "⏰"],
+  ["보건", "🩹"], ["안전", "🦺"], ["에너지", "💡"], ["전기", "💡"], ["소등", "💡"],
+  ["창문", "🪟"], ["문단속", "🔑"], ["열쇠", "🔑"], ["화분", "🪴"], ["식물", "🪴"],
+  ["휴지", "🧻"], ["우산", "☂️"], ["수리", "🔧"], ["고장", "🔧"],
+  ["핸드폰", "📱"], ["휴대폰", "📱"], ["가정통신문", "✉️"], ["통신문", "✉️"], ["업무", "🗂️"],
+  ["부회장", "🎖️"], ["반장", "👑"], ["회장", "👑"], ["책", "📖"], ["물", "💧"],
+];
+function roleEmoji(name) {
+  const n = String(name || "");
+  for (const [key, emoji] of ROLE_EMOJI) if (n.includes(key)) return emoji;
+  return "🌟";  // 매칭 실패 시 기본값
+}
+
 function parseRosterPaste(text) {
   const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
   const rows = [];
@@ -430,7 +721,9 @@ const App = {
     function parseHash() {
       const h = location.hash.replace(/^#\/?/, "");
       const parts = h.split("/").filter(Boolean);
-      if (parts[0] === "class" && parts[1]) {
+      if (parts[0] === "guide") {
+        route.view = "guide"; route.classId = null; route.draftId = null;
+      } else if (parts[0] === "class" && parts[1]) {
         route.classId = decodeURIComponent(parts[1]);
         if (parts[2] === "draft" && parts[3]) { route.view = "draft"; route.draftId = decodeURIComponent(parts[3]); }
         else if (parts[2] === "present") { route.view = "present"; route.draftId = null; }
@@ -443,14 +736,73 @@ const App = {
     window.addEventListener("hashchange", parseHash);
 
     // ---------------- 인증 ----------------
+    // 구글 로그인과 익명 로그인을 모두 지원한다.
+    // 익명 계정도 uid 를 받으므로 ownerUid 기반 보안 규칙은 손대지 않아도 그대로 동작한다.
+    // 대신 익명 계정은 이 브라우저에만 묶여 있어서, 방문 기록을 지우면 되살릴 방법이 없다.
+    // 그래서 (a) 시작 화면에서 미리 알리고 (b) 학급 목록에 배너를 띄우고
+    // (c) 로그아웃 전에 한 번 더 확인하고 (d) 언제든 구글 계정에 연결할 수 있게 했다.
     const user = ref(null);
+    const isAnonymous = computed(() => !!user.value?.isAnonymous);
+    const userLabel = computed(() => {
+      if (!user.value) return "";
+      return user.value.displayName || user.value.email || "익명 사용자";
+    });
+    const linking = ref(false);
+
     async function signIn() {
       try {
         const provider = new authMod.GoogleAuthProvider();
         await authMod.signInWithPopup(auth, provider);
-      } catch (e) { toast("로그인에 실패했습니다: " + e.message, "error"); }
+      } catch (e) {
+        if (e.code !== "auth/popup-closed-by-user") toast("로그인에 실패했습니다: " + e.message, "error");
+      }
     }
-    async function signOutUser() { await authMod.signOut(auth); go("#/classes"); }
+
+    // 로그인 없이 바로 시작 — 익명 계정을 발급받는다
+    async function signInAnon() {
+      try {
+        await authMod.signInAnonymously(auth);
+      } catch (e) {
+        if (e.code === "auth/operation-not-allowed") {
+          toast("Firebase 콘솔에서 '익명' 로그인 방식을 먼저 켜주세요.", "error");
+        } else {
+          toast("시작하지 못했습니다: " + e.message, "error");
+        }
+      }
+    }
+
+    // 익명 계정을 구글 계정에 연결한다.
+    // linkWithPopup 은 uid 를 그대로 유지하므로, 이미 만들어 둔 학급이 전부 따라온다.
+    async function linkGoogle() {
+      if (!auth.currentUser || linking.value) return;
+      linking.value = true;
+      try {
+        const provider = new authMod.GoogleAuthProvider();
+        await authMod.linkWithPopup(auth.currentUser, provider);
+        user.value = auth.currentUser;  // 연결만으로는 onAuthStateChanged 가 안 올 수 있어 직접 갱신
+        toast("구글 계정과 연결했어요. 이제 다른 기기에서도 이어서 쓸 수 있습니다.", "success");
+      } catch (e) {
+        if (e.code === "auth/credential-already-in-use") {
+          toast("이미 이 앱을 쓰고 있는 구글 계정입니다. 로그아웃한 뒤 그 계정으로 로그인해주세요.", "error");
+        } else if (e.code !== "auth/popup-closed-by-user" && e.code !== "auth/cancelled-popup-request") {
+          toast("연결에 실패했습니다: " + e.message, "error");
+        }
+      } finally { linking.value = false; }
+    }
+
+    async function signOutUser() {
+      // 익명 계정은 로그아웃하면 되찾을 방법이 없으므로 반드시 한 번 더 확인한다
+      if (isAnonymous.value) {
+        askConfirm(
+          "로그인 없이 사용 중입니다. 로그아웃하면 지금까지 만든 학급에 다시 들어갈 수 없어요. 그래도 로그아웃할까요?",
+          async () => { await authMod.signOut(auth); go("#/classes"); },
+          { icon: "👋", confirmLabel: "로그아웃" }
+        );
+        return;
+      }
+      await authMod.signOut(auth);
+      go("#/classes");
+    }
 
     // ---------------- 교사: 학급 목록 ----------------
     const classes = ref([]);
@@ -692,7 +1044,7 @@ const App = {
     }
 
     // ---------------- 발표용 화면 ----------------
-    const presentPalette = ["#6C5CE7", "#E0A63B", "#3FA875", "#E4645A", "#4AA3D9", "#C08552"];
+    const presentPalette = ["#62C370", "#F3B33D", "#FF8FB1", "#79C6EE", "#A98BE8", "#F2915E"];
     function presentColor(i) { return presentPalette[i % presentPalette.length]; }
     const presentGroups = computed(() => {
       const draft = finalDraft.value;
@@ -710,7 +1062,14 @@ const App = {
 
     // ---------------- 삭제 확인 모달 ----------------
     const confirmModal = ref(null); // { message, onConfirm }
-    function askConfirm(message, onConfirm) { confirmModal.value = { message, onConfirm }; }
+    // opts 로 아이콘과 확인 버튼 문구를 바꿀 수 있다 (삭제 말고 다른 확인에도 쓰기 위해)
+    function askConfirm(message, onConfirm, opts) {
+      confirmModal.value = {
+        message, onConfirm,
+        icon: (opts && opts.icon) || "🗑️",
+        confirmLabel: (opts && opts.confirmLabel) || "삭제",
+      };
+    }
     function resolveConfirm(ok) {
       const m = confirmModal.value; confirmModal.value = null;
       if (ok && m) m.onConfirm();
@@ -797,13 +1156,13 @@ const App = {
     return {
       loadingApp, firebaseConfigured, studentMode,
       toasts, route, go,
-      user, signIn, signOutUser,
+      user, signIn, signInAnon, signOutUser, isAnonymous, userLabel, linkGoogle, linking,
       classes, newClassName, createClass, deleteClass,
       currentClass, students, roles, preferences, drafts, activeTab,
       pasteText, pastePreview, confirmPasteImport, rangeStart, rangeEnd, confirmRangeGenerate,
       updateStudentName, newStudentNumber, newStudentName, addStudentManually, deleteStudent,
       loadPreset, addRole, updateRole, deleteRole, capacityTotal, studentCount, capacityShort,
-      toggleSubmission, joinUrl, qrCanvas, submittedList, notSubmittedList, firstChoiceCounts, roleName,
+      toggleSubmission, joinUrl, qrCanvas, submittedList, notSubmittedList, firstChoiceCounts, roleName, roleEmoji,
       running, runAssignment,
       currentDraft, unassignedRoster, roleAssignedCounts, reassignStudent, finalizeDraft, unlockDraft, deleteDraft,
       finalDraft, exportCsv, presentGroups, presentUnassigned, presentColor,
@@ -831,106 +1190,297 @@ const App = {
     <!-- ==================== 학생 모드 ==================== -->
     <template v-else-if="studentMode">
       <header class="topbar"><div class="brand"><div class="brand-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3l2.4 5.5L20 9l-4.2 3.8L17 19l-5-3.2L7 19l1.2-6.2L4 9l5.6-.5L12 3z" fill="white"/></svg></div><span class="brand-text">1P1J</span></div></header>
-      <main class="content">
-        <div v-if="stuLoading" class="center-screen"><p>불러오는 중...</p></div>
-        <div v-else-if="stuError" class="center-screen"><h2>{{ stuError }}</h2></div>
-        <div v-else>
-          <div class="card">
-            <h2>{{ stuClass?.className }}</h2>
-            <p class="hint">1인 1역 지망 접수</p>
-          </div>
-
-          <div v-if="!stuClass?.submissionOpen && stuStep !== 'done'" class="card center-screen" style="min-height:auto;padding:32px 20px">
-            <h2>접수가 마감되었습니다</h2>
-            <p class="muted">담임 선생님께 문의해주세요.</p>
+      <div v-if="stuLoading" class="center-screen"><p>불러오는 중...</p></div>
+      <div v-else-if="stuError" class="center-screen"><h2>{{ stuError }}</h2></div>
+      <template v-else>
+        <hero-band :title="stuClass?.className || '우리 반'" subtitle="1인 1역 지망 접수" />
+        <main class="content">
+          <div v-if="!stuClass?.submissionOpen && stuStep !== 'done'" class="card">
+            <div class="empty-state">
+              <span class="face">🙈</span>
+              <h2 style="margin:0">접수가 마감되었어요</h2>
+              <p class="muted" style="margin:4px 0 0">담임 선생님께 문의해 주세요.</p>
+            </div>
           </div>
 
           <template v-else>
             <div v-if="stuStep === 'number'" class="card">
-              <h3>번호를 입력하세요</h3>
-              <div class="row" style="margin-top:10px">
-                <input class="input" v-model="stuNumberInput" placeholder="예: 15" @keyup.enter="stuLookup" inputmode="numeric" />
+              <div class="empty-state" style="padding:8px 0 16px">
+                <span class="face">✋</span>
+                <h2 style="margin:0">번호를 입력해 주세요</h2>
+                <p class="muted" style="margin:4px 0 0">우리 반 출석 번호만 입력하면 돼요</p>
               </div>
+              <input class="input" style="text-align:center;font-size:28px;font-family:Jua,sans-serif;padding:12px" v-model="stuNumberInput" placeholder="15" @keyup.enter="stuLookup" inputmode="numeric" />
               <button class="btn btn-primary btn-lg" style="margin-top:14px" @click="stuLookup">확인</button>
             </div>
 
-            <div v-else-if="stuStep === 'confirm'" class="card center-screen" style="min-height:auto;padding:28px 20px">
-              <h2>{{ stuMatched?.name || '(이름 없음)' }} 학생이 맞나요?</h2>
-              <p class="muted">번호 {{ stuMatched?.number }}</p>
-              <div class="row" style="width:100%;margin-top:10px">
+            <div v-else-if="stuStep === 'confirm'" class="card">
+              <div class="empty-state" style="padding:8px 0 18px">
+                <span class="face">🐰</span>
+                <h2 style="margin:0">{{ stuMatched?.name || '(이름 없음)' }} 학생이 맞나요?</h2>
+                <p class="muted" style="margin:4px 0 0">번호 {{ stuMatched?.number }}</p>
+              </div>
+              <div class="row" style="width:100%">
                 <button class="btn" style="flex:1" @click="stuStep='number'">아니요</button>
                 <button class="btn btn-primary" style="flex:1" @click="stuProceedToChoose">네, 맞아요</button>
               </div>
             </div>
 
             <div v-else-if="stuStep === 'choose'" class="card">
-              <h3>1지망 (필수)</h3>
-              <div class="choice-list" style="margin-bottom:16px">
+              <h3><span class="badge" style="background:var(--butter-soft);color:var(--butter-dark);border-color:var(--butter)">1지망</span> 가장 하고 싶은 역할 · 필수</h3>
+              <div class="choice-list" style="margin-bottom:22px">
                 <div v-for="r in stuRoles" :key="r.id" class="choice-option rank1" :class="{selected: stuChoice1===r.id}" @click="stuSelect(0, r.id)">
-                  <span>{{ r.name }}</span>
+                  <span><span class="role-emoji">{{ roleEmoji(r.name) }}</span>{{ r.name }}</span>
                   <span v-if="stuChoice1===r.id" class="rank-badge">1지망</span>
                 </div>
               </div>
-              <h3>2지망 (선택)</h3>
-              <div class="choice-list" style="margin-bottom:16px">
+              <h3><span class="badge badge-blue">2지망</span> 그다음으로 하고 싶은 역할 · 선택</h3>
+              <div class="choice-list" style="margin-bottom:22px">
                 <div v-for="r in stuRoles.filter(x=>x.id!==stuChoice1)" :key="r.id" class="choice-option rank2" :class="{selected: stuChoice2===r.id}" @click="stuSelect(1, r.id)">
-                  <span>{{ r.name }}</span>
+                  <span><span class="role-emoji">{{ roleEmoji(r.name) }}</span>{{ r.name }}</span>
                   <span v-if="stuChoice2===r.id" class="rank-badge">2지망</span>
                 </div>
               </div>
-              <h3>3지망 (선택)</h3>
-              <div class="choice-list" style="margin-bottom:16px">
+              <h3><span class="badge badge-pink">3지망</span> 세 번째로 하고 싶은 역할 · 선택</h3>
+              <div class="choice-list" style="margin-bottom:22px">
                 <div v-for="r in stuRoles.filter(x=>x.id!==stuChoice1 && x.id!==stuChoice2)" :key="r.id" class="choice-option rank3" :class="{selected: stuChoice3===r.id}" @click="stuSelect(2, r.id)">
-                  <span>{{ r.name }}</span>
+                  <span><span class="role-emoji">{{ roleEmoji(r.name) }}</span>{{ r.name }}</span>
                   <span v-if="stuChoice3===r.id" class="rank-badge">3지망</span>
                 </div>
               </div>
               <button class="btn btn-primary btn-lg" :disabled="!stuChoice1 || stuSubmitting" @click="stuSubmit">제출하기</button>
             </div>
 
-            <div v-else-if="stuStep === 'done'" class="card center-screen" style="min-height:auto;padding:32px 20px">
-              <h2>제출 완료!</h2>
-              <p class="muted">접수가 마감되기 전까지는 다시 접속해 수정할 수 있어요.</p>
-              <button v-if="stuClass?.submissionOpen" class="btn" style="margin-top:10px" @click="stuEditAgain">지망 다시 수정하기</button>
+            <div v-else-if="stuStep === 'done'" class="card">
+              <div class="empty-state" style="padding:10px 0 18px">
+                <span class="face">🎉</span>
+                <h2 style="margin:0">제출 완료!</h2>
+                <p class="muted" style="margin:4px 0 0">접수가 마감되기 전까지는 다시 들어와 수정할 수 있어요.</p>
+              </div>
+              <button v-if="stuClass?.submissionOpen" class="btn" style="width:100%" @click="stuEditAgain">지망 다시 수정하기</button>
             </div>
           </template>
-        </div>
-      </main>
+        </main>
+      </template>
     </template>
 
     <!-- ==================== 교사 모드 ==================== -->
     <template v-else>
       <header class="topbar">
         <div class="brand" @click="go('#/classes')"><div class="brand-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3l2.4 5.5L20 9l-4.2 3.8L17 19l-5-3.2L7 19l1.2-6.2L4 9l5.6-.5L12 3z" fill="white"/></svg></div><span class="brand-text">1P1J</span></div>
-        <div v-if="user" class="user-box">
-          <span>{{ user.displayName || user.email }}</span>
-          <button class="btn btn-sm" @click="signOutUser">로그아웃</button>
+        <div class="user-box">
+          <button class="btn btn-sm" @click="go('#/guide')">📖 사용법</button>
+          <template v-if="user">
+            <span class="badge" :class="isAnonymous ? 'badge-gray' : 'badge-green'">{{ userLabel }}</span>
+            <button v-if="isAnonymous" class="btn btn-sm btn-primary link-btn" :disabled="linking" @click="linkGoogle">구글 계정 연결</button>
+            <button class="btn btn-sm" @click="signOutUser">로그아웃</button>
+          </template>
         </div>
       </header>
 
+      <!-- 화면마다 제목만 바꿔 같은 히어로 밴드를 재사용한다 -->
+      <hero-band v-if="route.view === 'guide'" title="사용법" subtitle="처음이신가요? 5분이면 충분해요" />
+      <hero-band v-else-if="!user" title="1인 1역 배정" subtitle="반 전체가 가장 만족하는 배정을, 단 한 번에" />
+      <hero-band v-else-if="route.view === 'classes'" title="내 학급" subtitle="학급을 만들고 1인 1역을 배정해 보세요" />
+      <hero-band v-else-if="route.view === 'class' && currentClass" :title="currentClass.className" subtitle="명단 → 역할 → 접수 → 배정 순서로 진행해요" />
+      <hero-band v-else-if="route.view === 'draft' && currentDraft" title="배정안 상세" subtitle="직접 고쳐 보고, 마음에 들면 확정하세요" />
+      <hero-band v-else-if="route.view === 'present'" title="1인 1역 발표" subtitle="우리 반 역할이 정해졌어요!" />
+
       <main class="content">
+        <!-- 사용법 — 로그인 전에도 볼 수 있어야 하므로 분기 맨 앞에 둔다 -->
+        <template v-if="route.view === 'guide'">
+          <div class="row-between" style="margin-bottom:14px">
+            <button class="btn btn-sm" @click="go('#/classes')">← 돌아가기</button>
+            <span class="badge badge-green">읽는 데 5분</span>
+          </div>
+
+          <div class="card">
+            <h2>🎯 이 앱이 하는 일</h2>
+            <p class="muted" style="margin:0;font-size:14.5px;line-height:1.85">
+              QR 코드로 학생들에게 1~3지망을 받은 뒤, <strong>반 전체에서 1지망을 받은 학생이 가장 많아지도록</strong> 배정안을 계산해 줍니다.
+              가위바위보나 제비뽑기와 달리, 서로 조금씩 양보하면 모두가 나아지는 조합까지 컴퓨터가 전부 따져 봅니다.
+              다만 <strong>결정은 선생님이 하십니다</strong> — 앱은 배정안을 제안할 뿐이고, 손으로 고치고 확정하는 건 선생님 몫이에요.
+            </p>
+          </div>
+
+          <h2 style="margin:24px 0 12px">👩‍🏫 선생님이 하는 일</h2>
+
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <h3>🏫 학급 만들기</h3>
+              <p>"내 학급" 화면에서 반 이름(예: 3학년 1반)을 적고 [개설하기]를 누르세요. 학급은 몇 개든 만들 수 있습니다.</p>
+            </div>
+          </div>
+
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <h3>🧑‍🤝‍🧑 명단 등록하기</h3>
+              <p>엑셀이나 구글 시트에서 "학번 / 이름" 두 열을 그대로 복사해 붙여넣으면 한 번에 등록됩니다. 번호만 먼저 만들어 두고(번호 범위로 생성) 이름을 나중에 채워도 됩니다.</p>
+              <div class="tip">💡 이름은 꼭 넣어 주세요. 학생이 번호를 제대로 입력했는지 <strong>자기 이름을 보고 스스로 확인</strong>하는 단계가 있습니다.</div>
+            </div>
+          </div>
+
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <h3>🎒 역할과 정원 정하기</h3>
+              <p>[프리셋 불러오기]로 자주 쓰는 역할 12개를 한 번에 넣고, 우리 반에 맞게 고치는 게 가장 빠릅니다. 역할마다 몇 명이 필요한지(정원)를 적어 주세요.</p>
+              <div class="tip">💡 정원 총합이 학생 수보다 많아도 괜찮습니다(빈자리로 남습니다). 반대로 <strong>모자라면 경고가 뜨고</strong>, 그 자리에서 바로 고칠 수 있어요.</div>
+            </div>
+          </div>
+
+          <div class="step-card">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <h3>📱 지망 접수 열기</h3>
+              <p>[접수 열기]를 누르면 QR 코드와 링크가 나옵니다. 교실 TV에 QR을 띄우면 학생들이 각자 휴대폰이나 태블릿으로 찍고 들어옵니다. 제출 현황은 실시간으로 갱신됩니다.</p>
+              <div class="tip">💡 미제출 학생 목록이 화면에 그대로 보이니, 누구를 챙겨야 하는지 바로 알 수 있어요.</div>
+            </div>
+          </div>
+
+          <div class="step-card">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <h3>✨ 배정 실행하기</h3>
+              <p>다 모였으면 [접수 마감하기]를 누르고 [배정 실행하기]를 누르세요. 1초도 안 걸립니다. 여러 번 눌러 배정안을 여러 개 만들어 두고 비교할 수 있습니다.</p>
+              <div class="tip">💡 각 배정안 아래에 "1지망 20명 · 2지망 4명 · 3지망 2명 · 미배정 2명"처럼 요약이 나옵니다. 이 숫자로 비교하세요.</div>
+            </div>
+          </div>
+
+          <div class="step-card">
+            <div class="step-num">6</div>
+            <div class="step-body">
+              <h3>✍️ 확인하고 확정하기</h3>
+              <p>배정안을 열면 학생별로 어떤 역할을 받았는지 볼 수 있고, 드롭다운으로 직접 바꿀 수도 있습니다. 마음에 들면 [최종 확정]을 누르세요.</p>
+              <div class="tip">💡 확정하면 잠깁니다. 다시 고치려면 [확정 해제]를 눌러야 해요 — 실수로 바뀌는 걸 막기 위한 장치입니다.</div>
+            </div>
+          </div>
+
+          <div class="step-card">
+            <div class="step-num">7</div>
+            <div class="step-body">
+              <h3>📣 발표하기</h3>
+              <p>[발표용 화면 열기]를 누르면 역할별로 누가 맡았는지 큼직하게 보여 줍니다. 교실 TV에 띄우거나 그대로 인쇄해서 게시하세요. CSV로 내려받아 나이스나 학급 문서에 붙여 넣을 수도 있습니다.</p>
+            </div>
+          </div>
+
+          <h2 style="margin:24px 0 12px">🧒 학생이 하는 일</h2>
+
+          <div class="step-card for-student">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <h3>📷 QR 찍고 들어오기</h3>
+              <p>선생님이 띄워 준 QR을 찍으면 바로 우리 반 화면이 열립니다. 앱을 설치할 필요도, 회원가입도 없습니다.</p>
+            </div>
+          </div>
+
+          <div class="step-card for-student">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <h3>✋ 번호 넣고 이름 확인하기</h3>
+              <p>출석 번호만 입력하면 "○○○ 학생이 맞나요?" 하고 이름이 뜹니다. 맞으면 [네, 맞아요]를 누릅니다. 비밀번호는 없습니다.</p>
+            </div>
+          </div>
+
+          <div class="step-card for-student">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <h3>🌟 지망 고르고 제출하기</h3>
+              <p>1지망은 꼭 골라야 하고, 2·3지망은 선택입니다. 제출한 뒤에도 접수가 마감되기 전이라면 다시 들어와 고칠 수 있습니다.</p>
+              <div class="tip">💡 <strong>학생은 배정 결과를 앱에서 볼 수 없습니다.</strong> 결과를 아는 학생과 모르는 학생이 섞여 교실이 어수선해지지 않도록, 선생님이 한 번에 발표하도록 만들었어요.</div>
+            </div>
+          </div>
+
+          <h2 style="margin:24px 0 12px">❓ 자주 묻는 질문</h2>
+
+          <div class="card">
+            <div class="faq">
+              <strong>실행할 때마다 결과가 다르게 나와요. 고장인가요?</strong>
+              <p>아닙니다, 의도한 동작입니다. 똑같이 좋은(1·2·3지망 인원이 같은) 배정안이 여러 개 있을 때 그중 하나를 무작위로 고르기 때문이에요. 마음에 드는 조합이 나올 때까지 여러 번 돌려 보고 비교하시면 됩니다.</p>
+            </div>
+            <div class="faq">
+              <strong>3지망까지 골랐는데 배정을 못 받은 학생이 있어요.</strong>
+              <p>인기 역할에 신청이 몰리면 생길 수 있습니다. 이때 앱은 <strong>남은 자리에 함부로 밀어 넣지 않고 "미배정"으로 남겨 둡니다.</strong> 아이와 이야기해 보고 선생님이 직접 정해 주시라는 뜻이에요. 지망을 아예 내지 않은 학생도 미배정으로 남습니다.</p>
+            </div>
+            <div class="faq">
+              <strong>학생이 결과를 미리 볼 수 있나요?</strong>
+              <p>없습니다. 지망과 배정 결과는 학급을 만든 선생님 계정에서만 열립니다. 다른 학생의 지망도 서로 볼 수 없습니다.</p>
+            </div>
+            <div class="faq">
+              <strong>명단을 잘못 넣었어요.</strong>
+              <p>명단 탭에서 언제든 이름을 고치거나 학생을 추가·삭제할 수 있습니다. 이미 제출한 학생의 지망은 그대로 남아 있습니다.</p>
+            </div>
+            <div class="faq">
+              <strong>로그인 없이 시작했는데, 집에서도 이어서 보고 싶어요.</strong>
+              <p>화면 위쪽 [구글 계정 연결]을 눌러 주세요. 지금까지 만든 학급을 그대로 가지고 구글 계정으로 옮겨 갑니다. 그 뒤로는 어느 기기에서든 같은 계정으로 로그인하면 됩니다.</p>
+            </div>
+            <div class="faq">
+              <strong>로그인 없이 쓰면 뭐가 불편한가요?</strong>
+              <p>학급이 <strong>지금 쓰는 이 브라우저에만</strong> 묶입니다. 다른 기기에서는 열 수 없고, 브라우저의 방문 기록·쿠키를 지우면 되돌릴 수 없습니다. 한 학기 내내 쓰실 거라면 구글 계정으로 로그인하시거나, 나중에라도 계정을 연결해 두시길 권합니다.</p>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="empty-state" style="padding:10px 0 18px">
+              <span class="face">🚀</span>
+              <h2 style="margin:0">이제 시작해 볼까요?</h2>
+            </div>
+            <button v-if="user" class="btn btn-primary btn-lg" @click="go('#/classes')">내 학급으로 가기</button>
+            <template v-else>
+              <button class="btn btn-primary btn-lg" @click="signIn">구글 계정으로 로그인</button>
+              <button class="btn btn-lg" style="margin-top:10px" @click="signInAnon">로그인 없이 바로 시작하기</button>
+            </template>
+          </div>
+        </template>
+
         <!-- 로그인 -->
-        <div v-if="!user" class="center-screen">
-          <h1>1P1J</h1>
-          <p class="muted">1인 1역, 반 전체 만족도를 최대화해서 배정합니다.</p>
-          <button class="btn btn-primary btn-lg" style="max-width:280px" @click="signIn">Google 계정으로 로그인</button>
+        <div v-else-if="!user" class="card" style="max-width:460px;margin:6px auto 0">
+          <div class="empty-state" style="padding:14px 0 20px">
+            <span class="face">🧸</span>
+            <h2 style="margin:0">선생님, 안녕하세요!</h2>
+            <p class="muted" style="margin:6px 0 0;font-size:13.5px">1인 1역 배정, 지금 바로 시작해 보세요.</p>
+          </div>
+          <button class="btn btn-primary btn-lg" @click="signIn">구글 계정으로 로그인</button>
+          <button class="btn btn-lg" style="margin-top:10px" @click="signInAnon">로그인 없이 바로 시작하기</button>
+          <p class="hint" style="text-align:center;margin-top:12px">
+            구글 로그인은 학교·집·휴대폰 어디서나 이어서 쓸 수 있어요.<br />
+            로그인 없이 시작하면 <strong>이 브라우저에만</strong> 학급이 저장되고, 방문 기록을 지우면 되돌릴 수 없습니다. (나중에 구글 계정으로 연결할 수 있어요)
+          </p>
+          <div class="row" style="justify-content:center;margin-top:14px">
+            <button class="btn btn-sm" @click="go('#/guide')">📖 사용법 먼저 보기</button>
+          </div>
         </div>
 
         <!-- 학급 목록 -->
         <template v-else-if="route.view === 'classes'">
-          <div class="card">
-            <h2>새 학급 만들기</h2>
+          <div v-if="isAnonymous" class="warning-box">
+            <span>🔒 로그인 없이 사용 중이에요. 이 브라우저에서만 학급을 열 수 있고, 방문 기록을 지우면 되돌릴 수 없습니다.</span>
+            <button class="btn btn-sm btn-primary" :disabled="linking" @click="linkGoogle">구글 계정 연결하기</button>
+          </div>
+          <div class="card tight">
+            <h3>✏️ 새 학급 만들기</h3>
             <div class="row">
-              <input class="input" v-model="newClassName" placeholder="예: 3학년 1반" @keyup.enter="createClass" />
-              <button class="btn btn-primary" @click="createClass">개설</button>
+              <input class="input" style="flex:1;min-width:180px;width:auto" v-model="newClassName" placeholder="예: 3학년 1반" @keyup.enter="createClass" />
+              <button class="btn btn-primary" @click="createClass">개설하기</button>
             </div>
           </div>
-          <h2 style="margin:20px 0 10px">내 학급</h2>
-          <div v-if="classes.length===0" class="muted">아직 개설한 학급이 없습니다.</div>
-          <div v-for="c in classes" :key="c.id" class="card row-between" style="cursor:pointer" @click="go('#/class/'+c.id)">
-            <div>
-              <strong>{{ c.className }}</strong>
-              <span class="badge" :class="c.submissionOpen ? 'badge-green' : 'badge-gray'" style="margin-left:8px">{{ c.submissionOpen ? '접수중' : '접수마감' }}</span>
+          <div v-if="classes.length===0" class="card">
+            <div class="empty-state">
+              <span class="face">🌱</span>
+              <h2 style="margin:0">아직 학급이 없어요</h2>
+              <p class="muted" style="margin:4px 0 0">위에서 첫 학급을 만들어 보세요.</p>
+              <button class="btn btn-sm" style="margin-top:14px" @click="go('#/guide')">📖 사용법 보기</button>
+            </div>
+          </div>
+          <div v-for="c in classes" :key="c.id" class="card class-card row-between" @click="go('#/class/'+c.id)">
+            <div class="row" style="flex-wrap:nowrap">
+              <span class="class-emoji">🏫</span>
+              <div>
+                <strong style="font-size:17px">{{ c.className }}</strong>
+                <span class="badge" :class="c.submissionOpen ? 'badge-green' : 'badge-gray'" style="margin-left:8px">{{ c.submissionOpen ? '접수중' : '접수마감' }}</span>
+              </div>
             </div>
             <button class="btn btn-sm btn-danger" @click.stop="askConfirm('\\''+c.className+'\\' 학급을 삭제할까요? 되돌릴 수 없습니다.', ()=>deleteClass(c.id))">삭제</button>
           </div>
@@ -938,24 +1488,23 @@ const App = {
 
         <!-- 학급 작업공간 -->
         <template v-else-if="route.view === 'class' && currentClass">
-          <div class="row-between">
-            <h1>{{ currentClass.className }}</h1>
-            <div class="row">
-              <button class="btn btn-sm" @click="go('#/classes')">← 학급 목록</button>
-            </div>
+          <div class="row-between" style="margin-bottom:14px">
+            <button class="btn btn-sm" @click="go('#/classes')">← 학급 목록</button>
+            <span class="badge" :class="currentClass.submissionOpen ? 'badge-green' : 'badge-gray'">{{ currentClass.submissionOpen ? '접수중' : '접수마감' }}</span>
           </div>
 
+          <!-- 탭이지만 실제로는 진행 순서라서 스텝 번호를 붙였다 -->
           <div class="tabs">
-            <div class="tab" :class="{active: activeTab==='roster'}" @click="activeTab='roster'">명단</div>
-            <div class="tab" :class="{active: activeTab==='roles'}" @click="activeTab='roles'">역할·정원</div>
-            <div class="tab" :class="{active: activeTab==='collect'}" @click="activeTab='collect'">지망 접수</div>
-            <div class="tab" :class="{active: activeTab==='assign'}" @click="activeTab='assign'">배정</div>
+            <div class="tab" :class="{active: activeTab==='roster'}" @click="activeTab='roster'"><span class="tab-step">1</span>명단</div>
+            <div class="tab" :class="{active: activeTab==='roles'}" @click="activeTab='roles'"><span class="tab-step">2</span>역할·정원</div>
+            <div class="tab" :class="{active: activeTab==='collect'}" @click="activeTab='collect'"><span class="tab-step">3</span>지망 접수</div>
+            <div class="tab" :class="{active: activeTab==='assign'}" @click="activeTab='assign'"><span class="tab-step">4</span>배정</div>
           </div>
 
           <!-- 명단 -->
           <div v-if="activeTab==='roster'">
             <div class="card">
-              <h3>붙여넣기로 등록</h3>
+              <h3>📋 붙여넣기로 등록</h3>
               <p class="hint">엑셀/시트에서 "학번 &lt;탭&gt; 이름" 두 열을 그대로 붙여넣으세요.</p>
               <textarea class="input" v-model="pasteText" placeholder="1	김민준&#10;2	이서연"></textarea>
               <div v-if="pasteText.trim()" class="tbl-wrap" style="margin-top:10px">
@@ -966,7 +1515,7 @@ const App = {
             </div>
 
             <div class="card">
-              <h3>번호 범위로 생성</h3>
+              <h3>🔢 번호 범위로 생성</h3>
               <div class="row">
                 <input class="input" style="max-width:100px" v-model="rangeStart" placeholder="1" inputmode="numeric" />
                 <span>번 부터</span>
@@ -977,7 +1526,7 @@ const App = {
             </div>
 
             <div class="card">
-              <h3>학생 개별 추가</h3>
+              <h3>➕ 학생 개별 추가</h3>
               <div class="row">
                 <input class="input" style="max-width:100px" v-model="newStudentNumber" placeholder="학번" />
                 <input class="input" v-model="newStudentName" placeholder="이름" @keyup.enter="addStudentManually" />
@@ -986,7 +1535,7 @@ const App = {
             </div>
 
             <div class="card">
-              <h3>전체 명단 ({{students.length}}명)</h3>
+              <h3>🧑‍🤝‍🧑 전체 명단 ({{students.length}}명)</h3>
               <div class="tbl-wrap">
                 <table class="tbl"><thead><tr><th style="width:80px">학번</th><th>이름</th><th style="width:60px"></th></tr></thead>
                 <tbody>
@@ -1003,11 +1552,11 @@ const App = {
           <!-- 역할·정원 -->
           <div v-if="activeTab==='roles'">
             <div v-if="capacityShort > 0" class="warning-box">
-              <span>역할 정원 총합({{capacityTotal}}명)이 학급 학생 수({{studentCount}}명)보다 적습니다. {{capacityShort}}명이 배정받을 자리가 없습니다.</span>
+              <span>⚠️ 역할 정원 총합({{capacityTotal}}명)이 학생 수({{studentCount}}명)보다 적어요. {{capacityShort}}명이 배정받을 자리가 없습니다.</span>
             </div>
             <div class="card">
               <div class="row-between">
-                <h3>역할 목록 (정원 총합 {{capacityTotal}}명 / 학생 {{studentCount}}명)</h3>
+                <h3>🎒 역할 목록 (정원 총합 {{capacityTotal}}명 / 학생 {{studentCount}}명)</h3>
                 <div class="row">
                   <button class="btn btn-sm" @click="loadPreset">프리셋 불러오기</button>
                   <button class="btn btn-sm" @click="addRole">역할 추가</button>
@@ -1017,7 +1566,7 @@ const App = {
                 <table class="tbl"><thead><tr><th>역할명</th><th style="width:100px">정원</th><th style="width:60px"></th></tr></thead>
                 <tbody>
                   <tr v-for="r in roles" :key="r.id">
-                    <td><input class="input" :value="r.name" @change="updateRole(r.id, {name: $event.target.value})" /></td>
+                    <td><div class="row" style="flex-wrap:nowrap;gap:6px"><span class="role-emoji" style="font-size:20px">{{ roleEmoji(r.name) }}</span><input class="input" :value="r.name" @change="updateRole(r.id, {name: $event.target.value})" /></div></td>
                     <td><input class="input" type="number" min="0" :value="r.capacity" @change="updateRole(r.id, {capacity: Number($event.target.value)||0})" /></td>
                     <td><button class="btn btn-sm btn-danger" @click="askConfirm('\\''+r.name+'\\' 역할을 삭제할까요?', ()=>deleteRole(r.id))">삭제</button></td>
                   </tr>
@@ -1030,7 +1579,7 @@ const App = {
           <!-- 지망 접수 -->
           <div v-if="activeTab==='collect'">
             <div v-if="capacityShort > 0" class="warning-box">
-              <span>역할 정원 총합이 학생 수보다 {{capacityShort}}명 부족합니다.</span>
+              <span>⚠️ 역할 정원 총합이 학생 수보다 {{capacityShort}}명 부족해요.</span>
               <button class="btn btn-sm" @click="activeTab='roles'">정원 수정하기</button>
             </div>
             <div class="card">
@@ -1048,21 +1597,21 @@ const App = {
 
             <div class="card">
               <div class="stat-grid">
-                <div class="stat-box"><div class="num" style="color:var(--danger)">{{ notSubmittedList.length }}</div><div class="label">미제출</div></div>
+                <div class="stat-box s3"><div class="num">{{ notSubmittedList.length }}</div><div class="label">미제출</div></div>
                 <div class="stat-box"><div class="num">{{ submittedList.length }}</div><div class="label">제출 완료</div></div>
-                <div class="stat-box"><div class="num">{{ students.length }}</div><div class="label">전체</div></div>
+                <div class="stat-box s0"><div class="num">{{ students.length }}</div><div class="label">전체</div></div>
               </div>
             </div>
 
             <div class="card">
-              <h3>역할별 1지망 집중도</h3>
+              <h3>📊 역할별 1지망 집중도</h3>
               <div class="tbl-wrap"><table class="tbl"><tbody>
-                <tr v-for="r in roles" :key="r.id"><td>{{r.name}}</td><td>{{ firstChoiceCounts[r.id] || 0 }}명</td></tr>
+                <tr v-for="r in roles" :key="r.id"><td><span class="role-emoji">{{ roleEmoji(r.name) }}</span> {{r.name}}</td><td><strong>{{ firstChoiceCounts[r.id] || 0 }}</strong>명</td></tr>
               </tbody></table></div>
             </div>
 
             <div class="card">
-              <h3>미제출 학생</h3>
+              <h3>⏰ 미제출 학생</h3>
               <p v-if="notSubmittedList.length===0" class="muted">모두 제출했습니다.</p>
               <div class="row" v-else>
                 <span v-for="s in notSubmittedList" :key="s.number" class="badge badge-red" style="margin:2px">{{s.number}} {{s.name}}</span>
@@ -1074,48 +1623,52 @@ const App = {
           <div v-if="activeTab==='assign'">
             <div class="card">
               <button class="btn btn-primary btn-lg" :disabled="running" @click="runAssignment">
-                {{ running ? '계산 중...' : '배정 실행 (새 배정안 생성)' }}
+                {{ running ? '계산 중...' : '✨ 배정 실행하기' }}
               </button>
-              <p class="hint">여러 번 실행해서 결과를 비교할 수 있습니다. 실행할 때마다 새 배정안이 저장됩니다.</p>
+              <p class="hint">여러 번 실행해서 결과를 비교할 수 있어요. 실행할 때마다 새 배정안이 저장되고, 동점인 최적해가 여러 개면 매번 조금씩 다른 결과가 나옵니다.</p>
             </div>
-            <h2 style="margin:16px 0 10px">배정안 목록</h2>
-            <div v-if="drafts.length===0" class="muted">아직 생성된 배정안이 없습니다.</div>
-            <div v-for="(d,i) in drafts" :key="d.id" class="draft-card" :class="{final: d.isFinal}" @click="go('#/class/'+route.classId+'/draft/'+d.id)">
-              <div class="row-between">
-                <strong>안 {{ drafts.length - i }} <span v-if="d.isFinal" class="badge badge-green" style="margin-left:6px">최종 확정</span></strong>
+            <h2 style="margin:20px 0 12px">배정안 목록</h2>
+            <div v-if="drafts.length===0" class="card">
+              <div class="empty-state">
+                <span class="face">🎲</span>
+                <h2 style="margin:0">아직 배정안이 없어요</h2>
+                <p class="muted" style="margin:4px 0 0">위 버튼을 눌러 첫 배정을 돌려 보세요.</p>
               </div>
-              <p class="hint">1지망 {{d.stats.first}}명, 2지망 {{d.stats.second}}명, 3지망 {{d.stats.third}}명, 미배정 {{d.stats.unassigned}}명</p>
+            </div>
+            <div v-for="(d,i) in drafts" :key="d.id" class="draft-card" :class="{final: d.isFinal}" @click="go('#/class/'+route.classId+'/draft/'+d.id)">
+              <span v-if="i===0 && !d.isFinal" class="ribbon">NEW</span>
+              <div class="row-between">
+                <strong style="font-size:17px">안 {{ drafts.length - i }} <span v-if="d.isFinal" class="badge badge-green" style="margin-left:6px">최종 확정</span></strong>
+              </div>
+              <p class="hint">1지망 {{d.stats.first}}명 · 2지망 {{d.stats.second}}명 · 3지망 {{d.stats.third}}명 · 미배정 {{d.stats.unassigned}}명</p>
             </div>
           </div>
         </template>
 
         <!-- 배정안 상세 -->
         <template v-else-if="route.view === 'draft' && currentDraft">
-          <div class="row-between">
-            <h1>배정안 상세</h1>
-            <div class="row">
-              <button class="btn btn-sm" @click="go('#/class/'+route.classId)">← 배정 목록</button>
-              <button class="btn btn-sm" @click="exportCsv">CSV 내보내기</button>
-            </div>
+          <div class="row-between" style="margin-bottom:14px">
+            <button class="btn btn-sm" @click="go('#/class/'+route.classId)">← 배정 목록</button>
+            <button class="btn btn-sm" @click="exportCsv">CSV 내보내기</button>
           </div>
 
           <div class="card">
             <div class="stat-grid">
-              <div class="stat-box"><div class="num">{{currentDraft.stats.first}}</div><div class="label">1지망</div></div>
-              <div class="stat-box"><div class="num">{{currentDraft.stats.second}}</div><div class="label">2지망</div></div>
-              <div class="stat-box"><div class="num">{{currentDraft.stats.third}}</div><div class="label">3지망</div></div>
-              <div class="stat-box"><div class="num">{{currentDraft.stats.unassigned}}</div><div class="label">미배정</div></div>
+              <div class="stat-box s1"><div class="num">{{currentDraft.stats.first}}</div><div class="label">1지망</div></div>
+              <div class="stat-box s2"><div class="num">{{currentDraft.stats.second}}</div><div class="label">2지망</div></div>
+              <div class="stat-box s3"><div class="num">{{currentDraft.stats.third}}</div><div class="label">3지망</div></div>
+              <div class="stat-box s0"><div class="num">{{currentDraft.stats.unassigned}}</div><div class="label">미배정</div></div>
             </div>
             <div class="row" style="margin-top:14px">
-              <button v-if="!currentDraft.isFinal" class="btn btn-primary" @click="finalizeDraft(currentDraft.id)">최종 확정</button>
+              <button v-if="!currentDraft.isFinal" class="btn btn-primary" @click="finalizeDraft(currentDraft.id)">🎯 최종 확정</button>
               <button v-else class="btn" @click="unlockDraft(currentDraft.id)">확정 해제</button>
-              <button v-if="currentDraft.isFinal" class="btn" @click="go('#/class/'+route.classId+'/present')">발표용 화면 열기</button>
+              <button v-if="currentDraft.isFinal" class="btn btn-pink" @click="go('#/class/'+route.classId+'/present')">📣 발표용 화면 열기</button>
               <button class="btn btn-danger" @click="askConfirm('이 배정안을 삭제할까요?', ()=>deleteDraft(currentDraft.id))">삭제</button>
             </div>
           </div>
 
           <div class="card">
-            <h3>학생별 배정 (직접 수정 가능)</h3>
+            <h3>✍️ 학생별 배정 (직접 수정 가능)</h3>
             <div class="tbl-wrap"><table class="tbl">
               <thead><tr><th>학번</th><th>이름</th><th>지망</th><th>배정된 역할</th></tr></thead>
               <tbody>
@@ -1125,7 +1678,7 @@ const App = {
                   <td>
                     <select class="input" :value="currentDraft.assignments[s.number] || ''" @change="reassignStudent(s.number, $event.target.value)">
                       <option value="">미배정</option>
-                      <option v-for="r in roles" :key="r.id" :value="r.id">{{r.name}} ({{roleAssignedCounts[r.id]||0}}/{{r.capacity}})</option>
+                      <option v-for="r in roles" :key="r.id" :value="r.id">{{ roleEmoji(r.name) }} {{r.name}} ({{roleAssignedCounts[r.id]||0}}/{{r.capacity}})</option>
                     </select>
                   </td>
                 </tr>
@@ -1134,7 +1687,7 @@ const App = {
           </div>
 
           <div class="card" v-if="unassignedRoster.length">
-            <h3>미배정 학생 ({{unassignedRoster.length}}명)</h3>
+            <h3>🙋 미배정 학생 ({{unassignedRoster.length}}명)</h3>
             <div class="row">
               <span v-for="s in unassignedRoster" :key="s.number" class="badge" :class="s.submitted ? 'badge-blue' : 'badge-gray'" style="margin:2px">
                 {{s.number}} {{s.name}} {{ s.submitted ? '' : '(미제출)' }}
@@ -1145,23 +1698,20 @@ const App = {
 
         <!-- 발표용 화면 -->
         <template v-else-if="route.view === 'present'">
-          <div class="row-between no-print">
-            <h1>발표용 화면</h1>
-            <div class="row">
-              <button class="btn btn-sm" @click="go('#/class/'+route.classId)">← 돌아가기</button>
-              <button class="btn btn-sm" @click="window.print()">인쇄</button>
-            </div>
+          <div class="row-between no-print" style="margin-bottom:14px">
+            <button class="btn btn-sm" @click="go('#/class/'+route.classId)">← 돌아가기</button>
+            <button class="btn btn-sm" @click="window.print()">🖨 인쇄</button>
           </div>
           <div v-if="!finalDraft" class="center-screen"><p>확정된 배정안이 없습니다.</p></div>
           <template v-else>
             <div class="present-grid">
               <div v-for="(g,gi) in presentGroups" :key="g.role.id" class="present-role" :style="{borderTopColor: presentColor(gi)}">
-                <h3>{{ g.role.name }}</h3>
+                <h3><span class="role-emoji">{{ roleEmoji(g.role.name) }}</span>{{ g.role.name }}</h3>
                 <div class="names">{{ g.names.join(', ') || '-' }}</div>
               </div>
             </div>
             <div v-if="presentUnassigned.length" class="present-role" style="margin-top:16px">
-              <h3>미배정</h3>
+              <h3>🙋 미배정</h3>
               <div class="names">{{ presentUnassigned.join(', ') }}</div>
             </div>
           </template>
@@ -1174,15 +1724,16 @@ const App = {
     <!-- 삭제 확인 모달 -->
     <div v-if="confirmModal" class="modal-backdrop" @click.self="resolveConfirm(false)">
       <div class="modal-box">
-        <p>{{ confirmModal.message }}</p>
-        <div class="row" style="justify-content:flex-end;margin-top:16px">
-          <button class="btn" @click="resolveConfirm(false)">취소</button>
-          <button class="btn btn-danger" @click="resolveConfirm(true)">삭제</button>
+        <div style="font-size:42px;line-height:1">{{ confirmModal.icon }}</div>
+        <p style="margin:10px 0 0">{{ confirmModal.message }}</p>
+        <div class="row" style="justify-content:center;margin-top:18px;flex-wrap:nowrap">
+          <button class="btn" style="flex:1" @click="resolveConfirm(false)">취소</button>
+          <button class="btn btn-danger" style="flex:1" @click="resolveConfirm(true)">{{ confirmModal.confirmLabel }}</button>
         </div>
       </div>
     </div>
 
-    <footer class="appfoot no-print">Made by 정우쌤 <span class="heart">·</span> Inspired by HSBT</footer>
+    <footer class="appfoot no-print">Made by 정우쌤 <span class="heart">🙏🏻</span> Inspired by HSBT</footer>
 
     <div class="toast-container no-print">
       <div v-for="t in toasts" :key="t.id" class="toast" :class="t.type">{{ t.message }}</div>
@@ -1191,7 +1742,63 @@ const App = {
   `,
 };
 
-createApp(App).mount("#app");
+// ------------------------------ 히어로 밴드 (전역 컴포넌트) ------------------------------
+// 노란 하늘 + 초록 언덕 + 마스코트로 이루어진 상단 밴드.
+// 화면마다 title/subtitle 만 바꿔 그대로 재사용한다.
+// 언덕은 "뒤 언덕 → 나무·깃발 → 앞 언덕" 순서로 그려서, 앞 언덕이 나무 밑동을 자연스럽게 가리게 했다.
+const HeroBand = {
+  props: {
+    title: { type: String, default: "" },
+    subtitle: { type: String, default: "" },
+  },
+  template: `
+  <div class="hero">
+    <!-- 마스코트는 이모지로 둔다. 직접 그린 일러스트보다 가볍고, 폰트가 알아서 예쁘게 그려준다. -->
+    <span class="hero-char left" aria-hidden="true">🐰</span>
+    <span class="hero-char right" aria-hidden="true">🧸</span>
+
+    <div class="hero-inner">
+      <h1 class="hero-title">{{ title }}</h1>
+      <p v-if="subtitle" class="hero-sub">{{ subtitle }}</p>
+      <slot></slot>
+    </div>
+
+    <!-- 언덕 일러스트 -->
+    <svg class="hero-hills" viewBox="0 0 1200 160" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+      <path d="M0 96 C150 44 330 44 470 88 C620 136 760 48 900 66 C1020 82 1120 56 1200 78 L1200 160 L0 160 Z" fill="#A5E2AE"/>
+      <g>
+        <rect x="176" y="58" width="9" height="52" rx="4" fill="#8A6A44"/>
+        <circle cx="180" cy="56" r="23" fill="#4FAE60"/>
+        <circle cx="159" cy="68" r="15" fill="#5CBB6D"/>
+        <circle cx="201" cy="68" r="15" fill="#5CBB6D"/>
+        <rect x="1016" y="64" width="8" height="58" rx="4" fill="#8A6A44"/>
+        <circle cx="1020" cy="62" r="20" fill="#4FAE60"/>
+        <circle cx="1002" cy="72" r="13" fill="#5CBB6D"/>
+        <circle cx="1038" cy="72" r="13" fill="#5CBB6D"/>
+        <rect x="86" y="50" width="5" height="64" rx="2.5" fill="#C9A227"/>
+        <path d="M91 53 L126 63 L91 73 Z" fill="#FF8FB1"/>
+        <rect x="700" y="58" width="5" height="76" rx="2.5" fill="#C9A227"/>
+        <path d="M705 61 L738 70 L705 79 Z" fill="#79C6EE"/>
+      </g>
+      <path d="M0 126 C180 86 360 92 520 122 C690 154 840 100 1000 114 C1090 122 1150 116 1200 108 L1200 160 L0 160 Z" fill="#62C370"/>
+      <g>
+        <rect x="905" y="128" width="3" height="14" fill="#3E9E52"/>
+        <circle cx="900" cy="126" r="6" fill="#8FD79A"/>
+        <circle cx="912" cy="126" r="6" fill="#8FD79A"/>
+        <circle cx="906" cy="119" r="6" fill="#8FD79A"/>
+        <rect x="300" y="130" width="3" height="12" fill="#3E9E52"/>
+        <circle cx="296" cy="128" r="5" fill="#8FD79A"/>
+        <circle cx="306" cy="128" r="5" fill="#8FD79A"/>
+        <circle cx="301" cy="121" r="5" fill="#8FD79A"/>
+      </g>
+    </svg>
+  </div>
+  `,
+};
+
+const app = createApp(App);
+app.component("HeroBand", HeroBand);
+app.mount("#app");
 </script>
 </body>
 </html>
